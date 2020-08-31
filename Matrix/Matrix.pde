@@ -7,7 +7,7 @@
 // when you change the matrix size, be sure to adjust the processing stage
 // size in setup() as well.  
 final int numRows=32; 
-final int numCols=64; 
+final int numCols=32; 
 
 // global variables
 PixelTeleporter pt;
@@ -23,8 +23,8 @@ LinkedList<ScreenLED> buildMatrix(int dimX,int dimY) {
     
   panel = new LinkedList<ScreenLED>();
   
-  xOffs = -(dimX * pixelSize) / 2;
-  yOffs = -(dimY * pixelSize) / 2;
+  xOffs = -((dimX-1) * pixelSize) / 2;
+  yOffs = -((dimY-1) * pixelSize) / 2;
   pixel = 0;
   
   for (row = 0; row < dimY; row++) {
@@ -38,7 +38,7 @@ LinkedList<ScreenLED> buildMatrix(int dimX,int dimY) {
 }
 
 void setup() {
-  size(1000,530,P3D);     // Set up the stage 
+  size(1000,1000,P3D);     // Set up the stage 
   colorMode(RGB, 255);   
   noStroke();
   rectMode(CENTER);        // Rectangles are positioned based on their center.
@@ -46,7 +46,7 @@ void setup() {
   sphereDetail(8);         // reduce polygons in sphere for improved performance
   
   pt = new PixelTeleporter("192.168.1.42",8081);
-  pt.setElementSize(20);
+  pt.setElementSize(22,95);
 
   blur = loadShader("blur.glsl");   
   
@@ -62,7 +62,7 @@ void draw() {
   pt.applyViewingTransform();
     
   for (ScreenLED led : panel) {
-    led.draw3D();
+    led.draw2D();
   }    
 
   filter(blur);       

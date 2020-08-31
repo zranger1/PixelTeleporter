@@ -1,7 +1,9 @@
 /////////////////////////////////////////////////////////// 
 ////////////////////////////////////////////////////////////
-// Pixel Teleporter.  Convenience class for networked pixel
-// data, objects to draw the data, and user camera control.
+// Pixel Teleporter
+// Makes it easier to prototype arrangements of LEDs by
+// encapsulating everything needed to read and display pixels
+// from a hardware LED controller. 
 //
 // Version  Date         Author Comment
 // v0.0.1   08/20/2020   JEM(ZRanger1)    Created
@@ -41,9 +43,11 @@ final static byte CMD_REQUEST_FRAME = (byte) 0xF0;
 
 ////////////////////////////////////////////////////////
 // Class PixelTeleporter
-// Makes it easier to prototype arrangements of LEDs by
-// encapsulating everything needed to read and display pixels
-// from an LED controller. 
+// Top level class.  Create one of these in your sketch then
+// call its start() method to listen on the network.
+//
+// Contains a PixelTeleporterThread object, which manages communication,
+// and a Mover object, which handles rendering and camera control.
 ////////////////////////////////////////////////////////
 public class PixelTeleporter {
   PixelTeleporterThread thread;
@@ -173,7 +177,7 @@ public class PixelTeleporterThread extends Thread {
     super.start();
   }
 
-  void run () {
+  void run() {
     while (running) {
       waitForDatagram();
       yield();
@@ -185,7 +189,7 @@ public class PixelTeleporterThread extends Thread {
       try {
         ds.receive(datagramIn);
       } 
-      catch (IOException e) { // catch pesky timeouts
+      catch (IOException e) { // catch those pesky timeouts
         status = UDP_NONE;  
         return;
       }     
@@ -204,7 +208,9 @@ public class PixelTeleporterThread extends Thread {
 //////////////////////////////////////
 // Class ScreenLED
 // Represents individual "LEDs".  x,y,z position are coordinates in model space
-// and index is the pixel's index in the incoming RGB data stream.
+// and index is the pixel's index in the incoming RGB data stream. The Draw2D
+// method is deprecated and will be removed in the near future.  Use Draw3D
+// and the P3D renderer instead.  It's faster and looks better.
 //////////////////////////////////////
 public class ScreenLED {
   float x,y,z;
@@ -248,12 +254,7 @@ public class ScreenLED {
     i = index;
     r = g_mover.pixelBuffer[i++]; g = g_mover.pixelBuffer[i++]; b = g_mover.pixelBuffer[i];
     fill(r,g,b);
-    circle(0,0,ledSize);
-    if ((r+g+b) > 10) {
-      fill(r,g,b,40);
-      circle(0,0,pixelSize);
-    }  
-    
+    circle(0,0,ledSize);   
     popMatrix();    
   } 
   
@@ -390,8 +391,13 @@ class Mover {
 //////////////////////////////////////
 void keyReleased() {
   switch (key) {        
-    case ' ':
+    case ' ': // stop automatic rotation
       g_mover.autoMove = !g_mover.autoMove;
+      break;
+    case 'r': //reset rotation
+      g_mover.setRotation(0,0,0);
+      g_mover.mouseRotation.x = 0;
+      g_mover.mouseRotation.y = 0;
       break;
     default:
       break;

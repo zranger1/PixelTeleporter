@@ -68,8 +68,8 @@ void setup() {
   shade.set("blurSize",5);
   shade.set("sigma",5.0f);
 
-// build 400 pixel cylinder, 20 rings of 20 pixels each.
-  object = buildCylinder(20,20,width / 10,0,false);
+// build 400 pixel cylinder, 20 rings of 30 pixels each.
+  object = buildCylinder(20,30,width / 10,0,false);
   
 // add slow rotation to enhance depth.  Spacebar toggles
 // rotation on/off.

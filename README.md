@@ -41,6 +41,9 @@ skill.  If you're new to this, no worries.  The ESP8266 setup is pretty by-the-n
 there's really nothing better than the instant feedback of the Pixelblaze/Processing combo to
 improve your coding and graphics skills.
 
+A ***computer*** with reasonably modern OpenGL compatible graphics hardware, running any OS that
+Processing 3 supports.  Faster is better.  
+
 
 ## Setup - The Short Version
 - Set the SSID and password for your network int PBExpansionTeleport.ino
