@@ -17,12 +17,12 @@ the Processing 3 environment.  It lets you hook an ESP8266 microcontroller to th
 controller in place of an LED strip/panel/whatever.  The microcontroller forwards the LED pixel data over
 WiFi as UDP datagrams to the computer running Processing.
 
-The Processing classes make it simple to write scripts that receive the data, then arrange render the pixels on your
+The Processing classes make it simple to write scripts that receive the data, then arrange and render the pixels on your
 computer.  With this toolset and the included the examples, you can quickly prototype almost any physical 
 arrangement of LEDs.
 
 ## Requirements
-An **ESP8266 microcontroller**.  I used one of these:
+An **ESP8266 microcontroller**.  I used a NodeMCU board -- one of these:
   https://www.amazon.com/HiLetgo-Internet-Development-Wireless-Micropython/dp/B081CSJV2V/
   
 The latest **Arduino IDE**, which can be downloaded from here:
@@ -41,8 +41,8 @@ skill.  If you're new to this, no worries.  The ESP8266 setup is pretty by-the-n
 there's really nothing better than the instant feedback of the Pixelblaze/Processing combo to
 improve your coding and graphics skills.
 
-A **computer** with reasonably modern OpenGL compatible graphics hardware, running any OS that
-Processing 3 supports.  Faster is better.  
+You'll also need a ***computer*** with reasonably modern OpenGL compatible graphics hardware, running
+any OS that Processing 3 supports.  Faster is better.  
 
 
 ## Setup - The Short Version
@@ -55,8 +55,7 @@ on the Pixelblaze to "Pixelblaze Output Expander".  Set your output channels up 
 WS2812 w/RGB order. Don't forget to set the start index for each channel you're using. For now,
 PixelTeleporter acts as a single expansion board supporting a maximum of 2048 pixels.
 - To run one of the processing examples, replace the IP address in the processing sketch with your
-ESP board's IP, set up your Pixelblaze appropriately, and go!  The Pixelblaze version
-of PixelTeleporter emulates an 8 channel expansion board, so 
+ESP board's IP, set up your Pixelblaze appropriately, and go!  
 
 The examples will give you a good start towards building your own virtual LED objects.
 
