@@ -1,4 +1,7 @@
 // Pixel Teleporter sphere demo
+// Fibonacci spiral sphere mapping algorithm from:
+// https://bduvenhage.me/geometry/2019/07/31/generating-equidistant-vectors.html
+//
 // Requires the sphere mapping function from this repository's
 // MappingFunctions directory.
 //

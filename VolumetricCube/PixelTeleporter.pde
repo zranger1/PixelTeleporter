@@ -8,12 +8,6 @@
 // Version  Date         Author Comment
 // v0.0.1   08/20/2020   JEM(ZRanger1)    Created
 //
-// Sits in a loop waiting for datagrams. The main
-// processing loop should use 
-//     boolean UDPListenerThread.available()
-// to query status, and 
-//     byte[] UDPListenerThread.getData() 
-// to retrieve data once a datagram has been received.
 //////////////////////////////////////////////////////////
 import java.lang.*; 
 import java.net.*;
@@ -208,9 +202,7 @@ public class PixelTeleporterThread extends Thread {
 //////////////////////////////////////
 // Class ScreenLED
 // Represents individual "LEDs".  x,y,z position are coordinates in model space
-// and index is the pixel's index in the incoming RGB data stream. The Draw2D
-// method is deprecated and will be removed in the near future.  Use Draw3D
-// and the P3D renderer instead.  It's faster and looks better.
+// and index is the pixel's index in the incoming RGB data stream. 
 //////////////////////////////////////
 public class ScreenLED {
   float x,y,z;

@@ -113,9 +113,10 @@ setup() with your own, check that your LED controller is configured correctly
 and press Processing's "Run" button.
 
 The following controls are available in all examples:
-- mouse wheel - zoom in and out
-- space bar - stop/start automatic rotation, if any
-- mouse left drag - rotate object.
+- mouse wheel:  zoom in and out
+- mouse left drag:  rotate object.
+- space bar:  Stop/start automatic rotation, if any
+- 'r' key: Reset rotation.
 
 The included examples are:
 
