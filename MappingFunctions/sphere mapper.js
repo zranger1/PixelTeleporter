@@ -4,7 +4,6 @@ function (pixelCount) {
  var phi = (Math.sqrt(5)+1)/2 - 1; 
  var ga = phi*2*Math.PI;           
  var lat,lon;
- var x,y,z;
  var map = [];
 
       

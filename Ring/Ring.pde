@@ -7,7 +7,7 @@ PShader blur;
 LinkedList<ScreenLED> ring;    // list of LEDs in our ring w/position and color info
 
 // build ring centered at origin of the drawing area.
-LinkedList<ScreenLED> buildRing(int nPixels,float radius,float startAngle) {
+LinkedList<ScreenLED> buildRing(int nPixels,float radius,float startAngle,float stopAngle) {
   LinkedList<ScreenLED> ring;
   float angle, increment;
   float centerX = width / 2.0;
@@ -21,7 +21,7 @@ LinkedList<ScreenLED> buildRing(int nPixels,float radius,float startAngle) {
     radius = min(radius,max(50,(float) nPixels * 4.25)); // try to pick a nice looking size
   }
   angle = startAngle;  
-  increment = TWO_PI / (float) nPixels;
+  increment = stopAngle / (float) nPixels;
     
   for (int i = 0; i < nPixels; i++) {
       ScreenLED led = new ScreenLED((radius * cos(angle)),
@@ -46,7 +46,7 @@ void setup() {
   blur = loadShader("blur.glsl");
 
 // build ring of 64 pixels, starting at 0 radians, with automatic radius  
-  ring = buildRing(64,0,0);  
+  ring = buildRing(64,0,0,TWO_PI);  
 
   pt.start();
 }

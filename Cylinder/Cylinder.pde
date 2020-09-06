@@ -14,7 +14,7 @@ PShader shade;               // shader for post processing effect
 // create one ring (not THE one ring, mind you... 
 // (Build a ring on the xz plane, centered at the origin)
 LinkedList<ScreenLED> buildRing(int nPixels,float yOffset,float radius,
-                                float startAngle,int startIndex) {
+                                float startAngle, float stopAngle,int startIndex) {
   LinkedList<ScreenLED> ring;
   float angle, increment;
     
@@ -22,7 +22,7 @@ LinkedList<ScreenLED> buildRing(int nPixels,float yOffset,float radius,
          
   pt.setObjectCenter(0,0,radius / 2);  
   angle = startAngle;  
-  increment = TWO_PI / (float) nPixels;
+  increment = stopAngle / (float) nPixels;
     
   for (int i = 0; i < nPixels; i++) {
       ScreenLED led = new ScreenLED();
@@ -46,7 +46,7 @@ LinkedList<ScreenLED> buildCylinder(int xDim,int yDim, float radius,float startA
   float yOffset = -(yDim * pixelSize / 2);
   
   for (i = 0; i < yDim; i++) {
-    cylinder.addAll(buildRing(xDim,yOffset,radius,startAngle,i * xDim));
+    cylinder.addAll(buildRing(xDim,yOffset,radius,startAngle,TWO_PI,i * xDim));
     if (spiral) startAngle += TWO_PI / yDim;
     yOffset += pixelSize;
   }
