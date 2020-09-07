@@ -30,7 +30,6 @@ public LinkedList<ScreenLED> buildSphere(int pixelCount,float radius) {
   if (radius == 0) {
     radius = height / 3;
   }
-  pt.setObjectCenter(0,0,radius / 2);  
    
   for (int i = 1; i <= pixelCount; ++i) {
     lon = ga*i;    

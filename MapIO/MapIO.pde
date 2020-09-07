@@ -10,34 +10,6 @@ LinkedList<ScreenLED> object; // list of LEDs in our object w/position and color
 
 PShader shade;               // shader for post processing effect
 
-
-// build volumetric cube centered at origin
-LinkedList<ScreenLED> buildVolumetricCube(int xDim,int yDim,int zDim) {
-  LinkedList<ScreenLED> cube = new LinkedList<ScreenLED>(); 
-  int x,y,z,index;
-  float xOffs,yOffs,zOffs;
-  float pixelSpacing = 2 * pixelSize;
-  
-  index = 0;
-
-  zOffs = -((float) zDim * pixelSpacing / 2.0);  
-  for (z = 0; z < zDim; z++) {
-    yOffs = -((float) yDim * pixelSpacing / 2.0);
-    for (y = 0; y < yDim; y++) {
-      xOffs = -((float) xDim * pixelSpacing / 2.0);      
-      for (x = 0; x < xDim; x++) {
-        ScreenLED led = new ScreenLED(x+xOffs,y+yOffs,z+zOffs);
-        led.setIndex(index++);
-        xOffs += pixelSpacing;        
-        cube.add(led);
-      }  
-      yOffs += pixelSpacing;
-    }
-    zOffs += pixelSpacing;    
-  } 
-  return cube;
-}
-
 void setup() {
   size(1000,1000,P3D);     // Set up the stage 
   colorMode(RGB, 255);   
@@ -52,17 +24,28 @@ void setup() {
   shade.set("blurSize",4);
   shade.set("sigma",5.0f);
 
-  object = buildVolumetricCube(10,10,10); 
+// read map JSON from file in data directory
+  object = 
+  importPixelblazeMap("data/cubemap.json",pixelSize);
+
+// find the object's rotational center and set it in the viewer
+  PVector center = findObjectCenter(object);
+  pt.setObjectCenter(center.x,center.y,center.z);  
+  
+// To export an object to a Pixelblaze compatible map file, call exportPixelblazeMap()
+// with the object list, a file name, a scaling factor, and a flag indicating whether
+// or not the object is 3D (true if 3D, false if 2D)
+// for example:
+//  exportPixelblazeMap(object,"data/output.json",1.0 / pixelSize,true); 
   
 // add slow rotation to enhance depth.  Spacebar toggles
-// rotation on/off.
+// rotation on/off, 'r' resets rotation.
   pt.setRotation(radians(-20),0,0);
   pt.setRotationRate(0,PI / 5000, 0);
  
 // start listening on network thread   
   pt.start();
 }
-
 void draw() {   
   pt.readData();
   background(30);

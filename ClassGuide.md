@@ -61,7 +61,7 @@ In your draw() function, you can call.
 That's all you need for a basic PixelTeleporter sketch.  Again, see the examples for
 complete, working sketches.
 
-## Class Reference
+## Class and Method Reference
 ### Class PixelTeleporter
 #### PixelTeleporter(String ipAddr,int port)
 Constructor.  Takes IPv4 address and port number. Port 8081 is usual.
@@ -99,3 +99,14 @@ Render LEDs as translucent circles.  Faster than draw3D, but not as cool.
 #### public void draw3D()
 Render LEDs as translucent spheres, with diameter proportional to on
 brightness.
+### Utility Methods
+#### LinkedList<ScreenLED> importPixelblazeMap(String fileName,float scale);
+Read a Pixelblaze compatible pixel map into a list of ScreenLED objects.  The <scale> parameter
+allows you to rescale the object as necessary for display.
+#### boolean exportPixelblazeMap(LinkedList<ScreenLED> object,String fileName,float scale, boolean is3D);
+Convert a list of ScreenLEDs to a Pixelblaze compatible JSON pixel map and write it to the specified file.
+The <scale> parameter allows you to scale the final output as necessary, and the <is3D> parameter lets
+you specify whether x,y,z coordinates (true)  or x,y coordinates (false) will be saved.
+#### PVector findObjectCenter( LinkedList<ScreenLED> object)
+Given a list of ScreenLEDs, returns the geometric center of the object, which can then be used as the
+center of rotation in the viewer by calling PixelTeleporter.setObjectCenter()

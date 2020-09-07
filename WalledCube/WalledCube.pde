@@ -24,7 +24,6 @@ LinkedList<ScreenLED> buildWalledCube(int dimX,int dimY,int dimZ) {
   yOffs = -((float) dimY * pixelSpacing / 2.0);  
   xOffs = -((float) dimZ * pixelSpacing / 2.0);        
   
-  pt.setObjectCenter(0,0,0);    
   index = 0;
     
 // top

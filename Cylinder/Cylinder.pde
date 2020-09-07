@@ -20,7 +20,6 @@ LinkedList<ScreenLED> buildRing(int nPixels,float yOffset,float radius,
     
   ring = new LinkedList<ScreenLED>();
          
-  pt.setObjectCenter(0,0,radius / 2);  
   angle = startAngle;  
   increment = stopAngle / (float) nPixels;
     
@@ -70,6 +69,7 @@ void setup() {
 
 // build 400 pixel cylinder, 20 rings of 30 pixels each.
   object = buildCylinder(20,30,width / 10,0,false);
+  pt.setObjectCenter(0,0,0);
   
 // add slow rotation to enhance depth.  Spacebar toggles
 // rotation on/off.

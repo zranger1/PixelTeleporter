@@ -21,6 +21,17 @@ The Processing classes make it simple to write scripts that receive the data, th
 computer.  With this toolset and the included the examples, you can quickly prototype almost any physical 
 arrangement of LEDs.
 
+## Version 0.0.2 (9/7/2020) What's New
+Added Pixelblaze pixel map import export. This let you build a displayable object directly from a
+Pixelblaze compatible json map. See the new **MapIO** example and Class Guide for more information.
+
+Also... minor bug fixes in viewport management and ongoing cosmetic touchup of examples.
+
+**ADVANCE NOTICE**:  PixelTeleporter has become large enough that it now needs to be a "normal" Processing 
+library instead of a file you add to your sketch.  This change will make it a lot easier to maintain, document
+and improve. I'm in mid-conversion now, so it'll be coming soon.  Initially at least, there won't be much visible
+difference, but it will require some minor syntax changes to your sketches.
+
 ## Requirements
 An **ESP8266 microcontroller**.  I used a NodeMCU board -- one of these:
   https://www.amazon.com/HiLetgo-Internet-Development-Wireless-Micropython/dp/B081CSJV2V/
@@ -151,4 +162,12 @@ in the repository to use the sphere as a 2D surface.
 Emulation of JeffV's Fireworks2020 setup from the Pixelblaze forums. See the video
 of his actual setup at  https://youtu.be/zgF3DJoTAWI.  The pattern is available under
 the topic "Fireworks for the 4th" in the Pixelblaze forums.
+
+### MapIO
+Reads a Pixelblaze JSON pixel map (in this case, the walled cube) from a file and
+uses it to build a displayable object.  You can get these maps by running your
+Pixelblaze mapping function in a Javascript interpreter and capturing the output,
+or as I did, you can use your browser's debug console to capture the map directly
+from the Pixelblaze web UI by temporarily adding "console.debug(map) to the mapping function
+right before it returns the map. 
   

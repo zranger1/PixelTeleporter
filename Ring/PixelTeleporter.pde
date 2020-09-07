@@ -7,6 +7,7 @@
 //
 // Version  Date         Author Comment
 // v0.0.1   08/20/2020   JEM(ZRanger1)    Created
+// v0.0.2   09/08/2020   JEM(ZRanger2)    bug fixes, import/export map
 //
 //////////////////////////////////////////////////////////
 import java.lang.*; 
@@ -358,9 +359,10 @@ class Mover {
     rotateY(mouseRotation.x);
   }
   
-  void applyViewingTransform() {
+  void applyViewingTransform() { 
   moveCamera();    
-  translate(width / 2,height /2, objectCenter.z);
+  translate(width / 2,height /2, 0);
+  
   applyMouseRotation();
 
   if (autoMove) {
@@ -372,9 +374,88 @@ class Mover {
 
   rotateX(currentRotation.x);
   rotateY(currentRotation.y);
-  rotateZ(currentRotation.z);          
+  rotateZ(currentRotation.z);
+  translate(-objectCenter.x,-objectCenter.y,-objectCenter.z);     
   } 
 }
+
+//////////////////////////////////////
+// Utility Methods - mostly for working with "objects"
+// or lists of ScreenLEDs.  
+// WARNING:  This is #1 on the list for refactoring when
+// PixelTeleporter becomes a real Java library.  Shouldn't
+// change much in sketch code, but keep an eye out.
+//////////////////////////////////////
+ 
+LinkedList<ScreenLED> importPixelblazeMap(String fileName,float scale) {
+  LinkedList<ScreenLED> object = new LinkedList<ScreenLED>();
+  JSONArray json = loadJSONArray(fileName);
+  print(json.size());
+  
+  for (int i = 0; i < json.size(); i++) {
+   float x,y,z;
+    
+    JSONArray mapEntry = json.getJSONArray(i);
+    float [] coords = mapEntry.getFloatArray();  
+    
+    x = coords[0];
+    y = coords[1];
+    z = (coords.length == 3) ? z = coords[2] : 0;
+    
+    ScreenLED led = new ScreenLED(scale * x,scale * y,scale * z);
+    led.setIndex(i);
+    object.add(led);
+  }
+  
+  return object;
+}
+
+// comparator for sorting.  Used by exportPixeblazeMap()
+class compareLEDIndex implements Comparator<ScreenLED> {
+   public int compare(ScreenLED p1, ScreenLED p2) {
+     return (p1.index < p2.index) ? -1 : 1;
+   }
+}
+
+// Write ScreenLED list coordinates to file as a JSON pixel map
+boolean exportPixelblazeMap(LinkedList<ScreenLED> object,String fileName,float scale, boolean is3D) {
+  JSONArray json,mapEntry;
+  
+// sort object by pixel index for export. 
+  LinkedList<ScreenLED> sortedCopy = (LinkedList<ScreenLED>) object.clone();
+  Collections.sort(sortedCopy,new compareLEDIndex());
+  print(sortedCopy.size());
+
+  json = new JSONArray();
+  for (ScreenLED led : sortedCopy) {
+    mapEntry = new JSONArray();
+    mapEntry.append(scale * led.x);
+    mapEntry.append(scale * led.y);
+    if (is3D) mapEntry.append(scale * led.z);    
+   
+    json.append(mapEntry);
+  }  
+  return saveJSONArray(json,fileName);  
+}
+
+// Find geometric center of object represented by ScreenLED list
+PVector findObjectCenter( LinkedList<ScreenLED> object) {
+  PVector c = new PVector(0,0,0);
+  PVector mins = new PVector(0,0,0);
+  PVector maxes = new PVector(0,0,0);
+  
+  for (ScreenLED led : object) {
+    if (led.x < mins.x) mins.x = led.x; if (led.x > maxes.x) maxes.x = led.x;
+    if (led.y < mins.y) mins.y = led.y; if (led.y > maxes.y) maxes.y = led.y;
+    if (led.z < mins.z) mins.z = led.z; if (led.z > maxes.z) maxes.z = led.z;    
+  }
+  
+  c.x = (maxes.x - mins.x) / 2;
+  c.y = (maxes.y - mins.y) / 2;
+  c.z = (maxes.z - mins.z) / 2;
+  
+  return c;
+}   
 
 //////////////////////////////////// 
 // UI Event (mouse and keyboard) event handlers.  Requires an initialized
