@@ -9,12 +9,10 @@ This version of PixelTeleporter works exclusively with the [Pixelblaze controlle
 A generic APA-102 compatible version that will work with most other LED controllers is currently in the works.
 
 ## Ok, but what *exactly* is PixelTeleporter?
-It's for building virtual prototypes of LED objects and testing them using a real LED controller.  
-
 PixelTeleporter is a software toolkit - an Arduino IDE sketch file for ESP8266, and a library for
-the Processing 3 environment.  It lets you hook a microcontroller or other server device to the output of your LED
-controller in place of an LED strip/panel/whatever.  The server then forwards the LED pixel data from the hardware
-controller over WiFi as UDP datagrams to the computer running Processing and displaying your LED output.
+the Processing 3 environment.  It lets you hook a microcontroller (eventually other server devices as well)
+to the output of your LED controller in place of an LED strip/panel/whatever.  The server then forwards the
+LED pixel data from the hardware controller over WiFi as UDP datagrams to the computer running Processing and displaying your LED output.
 
 The Processing library make it simple to write sketches that receive the data, then arrange and render the pixels on your
 computer.  With this toolset and the included the examples, you can quickly prototype almost any physical 
@@ -24,7 +22,7 @@ arrangement of LEDs.
 **PixelTeleporter is now a Processing library!**
 See the new installation and usage instructions below.  Being a library makes many things easier going forward. 
 Your sketch code will require a lot less boilerplate, the examples are easily accessible through the Processing UI,
-and it will be way,way easier to add and improve features without breaking anybody's scripts.
+and it will be way, way easier to add and improve features without breaking anybody's scripts.
 
 This time though, exisiting scripts will need minor changes to work with the library version -- see the examples and the Javadoc for details. 
 The "old" version of PixelTeleporter is still available on the "archive" branch of the [git repository](https://github.com/zranger1/PixelTeleporter).
@@ -59,7 +57,8 @@ You'll also need a ***computer*** with reasonably modern OpenGL compatible graph
 any OS that Processing 3 supports.  Faster is better.  
 
 ## Installing the Library into Processing
-To install, you will need to download the library and manually copy it to the ```libraries``` folder of your Processing sketchbook.
+To install, you will need to [download the library](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.0.0) and
+manually copy it to the ```libraries``` folder of your Processing sketchbook.
 To find the Processing sketchbook on your computer, open the Preferences window from the Processing application (PDE) and look 
 for the "Sketchbook location" item at the top.
 
@@ -67,10 +66,10 @@ By default the following locations are used for your sketchbook folder:
   * For Mac users, the sketchbook folder is located in `~/Documents/Processing` 
   * For Windows users, the sketchbook folder is located in `My Documents/Processing`
 
-Download [PixelTeleporter.zip](PixelTeleporter\distribution\PixelTeleporter-1\PixelTeleporter.zip) from this repository.
+Download the latest release - [PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.0.0) from this repository.
 
 Unzip and copy the PixelTeleporter folder into the `libraries` folder in the Processing sketchbook.
-If `'libraries` does not exist, (this is unlikely, but possible) you will need to create it.
+If `libraries` does not exist, (this is unlikely, but possible) you will need to create it.
 
 The folder structure should look like this:
 
@@ -199,7 +198,8 @@ Now, you're done with setup. PixelTeleporter allows your draw function to be ver
 ```
 
 That's it!  All you need for a basic PixelTeleporter sketch.  See the examples for
-complete, working sketches, and the Javadocs in the  [git repository](https://github.com/zranger1/PixelTeleporter) (or in reference subdir of your installation directory)
+complete, working sketches, and the [Javadocs](https://github.com/zranger1/PixelTeleporter/blob/master/PixelTeleporter/reference/index.html) in
+the [git repository](https://github.com/zranger1/PixelTeleporter) (or in reference subdir of your installation directory)
 for more technical information.
 
 ## Examples

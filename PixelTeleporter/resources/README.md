@@ -1,20 +1,18 @@
 # PixelTeleporter
-- **View** pixel output from your hardware LED controller as virtual 3D pixels on a computer monitor.  
-- **Prototype** a virtual version of your next LED project so you can build, preview and debug the software before you build
+- **Display:** View the output from your hardware LED controller as virtual 3D pixels on a computer monitor.  
+- **Prototype:** Build a virtual version of your next LED project so you can have software written and debugged before you build
 the physical display.
-- **Evaluate** performance, test and tune your LED patterns away from the hardware installation. 
+- **Evaluate:** Test, tune and update your pattern software at your bench, away from the hardware installation. 
 
-This version of PixelTeleporter works exclusively with [Pixelblaze]( https://www.bhencke.com/pixelblaze ).
+This version of PixelTeleporter works exclusively with the [Pixelblaze controller](https://www.bhencke.com/pixelblaze).
 
 A generic APA-102 compatible version that will work with most other LED controllers is currently in the works.
 
 ## Ok, but what *exactly* is PixelTeleporter?
-It's for building virtual prototypes of LED objects and testing them using a real LED controller.  
-
 PixelTeleporter is a software toolkit - an Arduino IDE sketch file for ESP8266, and a library for
-the Processing 3 environment.  It lets you hook a microcontroller or other server device to the output of your LED
-controller in place of an LED strip/panel/whatever.  The server then forwards the LED pixel data from the hardware
-controller over WiFi as UDP datagrams to the computer running Processing and displaying your LED output.
+the Processing 3 environment.  It lets you hook a microcontroller (eventually other server devices as well)
+to the output of your LED controller in place of an LED strip/panel/whatever.  The server then forwards the
+LED pixel data from the hardware controller over WiFi as UDP datagrams to the computer running Processing and displaying your LED output.
 
 The Processing library make it simple to write sketches that receive the data, then arrange and render the pixels on your
 computer.  With this toolset and the included the examples, you can quickly prototype almost any physical 
@@ -22,13 +20,12 @@ arrangement of LEDs.
 
 ## Version 1.0.0 (9/24/2020) What's New
 **PixelTeleporter is now a Processing library!**
-
 See the new installation and usage instructions below.  Being a library makes many things easier going forward. 
 Your sketch code will require a lot less boilerplate, the examples are easily accessible through the Processing UI,
-and it will be way,way easier to add and improve features without breaking anybody's scripts.
+and it will be way, way easier to add and improve features without breaking anybody's scripts.
 
 This time though, exisiting scripts will need minor changes to work with the library version -- see the examples and the Javadoc for details. 
-The "old" version of PixelTeleporter is still available on the "archive" branch of the git repository.
+The "old" version of PixelTeleporter is still available on the "archive" branch of the [git repository](https://github.com/zranger1/PixelTeleporter).
 
 ## Version 0.0.2 (9/7/2020) What's New
 Added Pixelblaze pixel map import export. This let you build a displayable object directly from a
@@ -60,7 +57,8 @@ You'll also need a ***computer*** with reasonably modern OpenGL compatible graph
 any OS that Processing 3 supports.  Faster is better.  
 
 ## Installing the Library into Processing
-To install, you will need to download the library and manually copy it to the `libraries` folder of your Processing sketchbook.
+To install, you will need to [download the library](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.0.0) and
+manually copy it to the ```libraries``` folder of your Processing sketchbook.
 To find the Processing sketchbook on your computer, open the Preferences window from the Processing application (PDE) and look 
 for the "Sketchbook location" item at the top.
 
@@ -68,10 +66,10 @@ By default the following locations are used for your sketchbook folder:
   * For Mac users, the sketchbook folder is located in `~/Documents/Processing` 
   * For Windows users, the sketchbook folder is located in `My Documents/Processing`
 
-Download PixelTeleporter.zip from this repository.
+Download the latest release - [PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.0.0) from this repository.
 
 Unzip and copy the PixelTeleporter folder into the `libraries` folder in the Processing sketchbook.
-If `'libraries` does not exist, (this is unlikely, but possible) you will need to create it.
+If `libraries` does not exist, (this is unlikely, but possible) you will need to create it.
 
 The folder structure should look like this:
 
@@ -88,7 +86,7 @@ Processing
              
 After installing PixelTeleporter, restart Processing.
 
-## Hardware Setup - The Short Version
+## Hardware Setup ESP8266 - The Short Version
 - Set the SSID and password for your network in servers/ESP8266/pbxTeleporter.ino
 - Set the serial upload rate to 115000 baud
 - Compile and upload the sketch with the serial monitor open.  Take note of the ESP's IP address.
@@ -102,7 +100,7 @@ ESP board's IP, set up your Pixelblaze appropriately, and go!
 
 The examples will give you a good start towards building your own virtual LED objects.
 
-## Hardware Setup in More Detail
+## Hardware Setup for ESP8266 in More Detail
 ### Preparing your ESP8266
 Connect your ESP8266 board to your computer with a USB cable (or other serial connector). Use the Arduino
 IDE to open ESP8266 sketch pbxTeleporter.ino in the repository's servers/ESP8266/pbxTeleporter directory.
@@ -200,7 +198,8 @@ Now, you're done with setup. PixelTeleporter allows your draw function to be ver
 ```
 
 That's it!  All you need for a basic PixelTeleporter sketch.  See the examples for
-complete, working sketches, and the Javadocs in the git repository (or in reference subdir of your installation directory)
+complete, working sketches, and the [Javadocs](https://github.com/zranger1/PixelTeleporter/blob/master/PixelTeleporter/reference/index.html) in
+the [git repository](https://github.com/zranger1/PixelTeleporter) (or in reference subdir of your installation directory)
 for more technical information.
 
 ## Examples
@@ -258,8 +257,9 @@ from the Pixelblaze web UI by temporarily adding "console.debug(map) to the mapp
 right before it returns the map. 
 
 # Building the PixelTeleporter Library 
-The Processing library portion of PixelTeleporter is built using the Eclipse IDE for Java, version 2019-6.  To build it, clone the repository,
-and open it as an Eclipse project.  Check that the build and library settings in Eclipse work on your machine,
+The Processing library portion of PixelTeleporter is built using the Eclipse IDE for Java, version 2019-6.  To build it, clone the
+[repository](https://github.com/zranger1/PixelTeleporter) ,and open it as an Eclipse project.  Check that
+ the build and library settings in Eclipse work on your machine,
 build the project and go! 
 
 
