@@ -24,12 +24,13 @@ See the new installation and usage instructions below.  Being a library makes ma
 Your sketch code will require a lot less boilerplate, the examples are easily accessible through the Processing UI,
 and it will be way, way easier to add and improve features without breaking anybody's scripts.
 
-This time though, exisiting scripts will need minor changes to work with the library version -- see the examples and the Javadoc for details. 
+This time though, exisiting scripts will need minor changes to work with the library version -- see the examples
+and the [Javadoc](https://zranger1.github.io/PixelTeleporter/pixelTeleporter/library/package-summary.html)for details. 
 The "old" version of PixelTeleporter is still available on the "archive" branch of the [git repository](https://github.com/zranger1/PixelTeleporter).
 
 ## Version 0.0.2 (9/7/2020) What's New
 Added Pixelblaze pixel map import export. This let you build a displayable object directly from a
-Pixelblaze compatible json map. See the new **MapIO** example and Class Guide for more information.
+Pixelblaze compatible json map. See the new **MapIO** example for more information.
 
 Also... minor bug fixes in viewport management and ongoing cosmetic touchup of examples.
 
@@ -57,8 +58,9 @@ You'll also need a ***computer*** with reasonably modern OpenGL compatible graph
 any OS that Processing 3 supports.  Faster is better.  
 
 ## Installing the Library into Processing
-To install, you will need to [download the library](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.0.0) and
+To install, you will need to [download PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.0.0) and
 manually copy it to the ```libraries``` folder of your Processing sketchbook.
+
 To find the Processing sketchbook on your computer, open the Preferences window from the Processing application (PDE) and look 
 for the "Sketchbook location" item at the top.
 
@@ -71,7 +73,7 @@ Download the latest release - [PixelTeleporter.zip](https://github.com/zranger1/
 Unzip and copy the PixelTeleporter folder into the `libraries` folder in the Processing sketchbook.
 If `libraries` does not exist, (this is unlikely, but possible) you will need to create it.
 
-The folder structure should look like this:
+The folder structure should look like when you're done:
 
 ```
 Processing
@@ -217,19 +219,22 @@ The following controls are available in all examples:
 The included examples are:
 
 ### Matrix
-All 2048 pixels in a 32x64 matrix.  Use with the default Pixelblaze mapper.
-(Be sure that any line that references zigzag wiring is commented out.) 
+All 2048 pixels in a 32x64 matrix.  Use with the default Pixelblaze matrix mapper.
+(Be sure to set width in the mapping function and comment out any line that
+references zigzag wiring.) 
 
 ### Ring
-Simulated LED ring.  Adjustable radius and start and stop angles.
+Simulated LED ring.  Adjustable radius and start and stop angles.  The Pixelblaze
+ring mapper is optional.
 
 ### Walled Cube
 600 pixel (10x10) walled cube.  Use with the walled cube mapping function from
-this repository's MappingFunctions folder.
+the example's PixelMap tab or from the repository's
+[MappingFunctions](https://github.com/zranger1/PixelTeleporter/tree/master/PixelTeleporter/examples/MappingFunctions) .
 
 ### Volumetric Cube
 1000 pixel (10x10x10) volumetric cube. Use with either this
-repository's mapping function or the default Pixelblaze mapper.
+mapping function in the example's PixelMap tab or with the default Pixelblaze mapper.
 (If you use the Pixelblaze's mapper, be sure that any line that
 references zigzag wiring is commented out.)
 
@@ -240,8 +245,9 @@ you can configure the cylinder as a spiral and just run it
 1D.  See the example code for details.
 
 ### Sphere
-Maps LEDs evenly over the surface of a sphere.  Use the sphere mapper
-in the repository to use the sphere as a 2D surface. 
+Maps LEDs evenly over the surface of a sphere. To use the sphere as a 2D surface, use the sphere mapper
+in the example's PixelMap tab or the repository's
+[MappingFunctions](https://github.com/zranger1/PixelTeleporter/tree/master/PixelTeleporter/examples/MappingFunctions) .
 
 ### Fireworks2020
 Emulation of JeffV's Fireworks2020 setup from the Pixelblaze forums. See the video
@@ -253,12 +259,12 @@ Reads a Pixelblaze JSON pixel map (in this case, the walled cube) from a file an
 uses it to build a displayable object.  You can get these maps by running your
 Pixelblaze mapping function in a Javascript interpreter and capturing the output,
 or as I did, you can use your browser's debug console to capture the map directly
-from the Pixelblaze web UI by temporarily adding "console.debug(map) to the mapping function
+from the Pixelblaze web UI by temporarily adding `console.debug(map)` to the mapping function
 right before it returns the map. 
 
 # Building the PixelTeleporter Library 
 The Processing library portion of PixelTeleporter is built using the Eclipse IDE for Java, version 2019-6.  To build it, clone the
-[repository](https://github.com/zranger1/PixelTeleporter) ,and open it as an Eclipse project.  Check that
+[repository](https://github.com/zranger1/PixelTeleporter) ,and import it as an Eclipse project.  Check that
  the build and library settings in Eclipse work on your machine,
 build the project and go! 
 
