@@ -198,7 +198,7 @@ Now, you're done with setup. PixelTeleporter allows your draw function to be ver
 ```
 
 That's it!  All you need for a basic PixelTeleporter sketch.  See the examples for
-complete, working sketches, and the [Javadocs](https://github.com/zranger1/PixelTeleporter/blob/master/PixelTeleporter/reference/index.html) in
+complete, working sketches, and the [Javadocs](https://zranger1.github.io/PixelTeleporter/pixelTeleporter/library/package-summary.html) in
 the [git repository](https://github.com/zranger1/PixelTeleporter) (or in reference subdir of your installation directory)
 for more technical information.
 
