@@ -61,16 +61,17 @@ public class PixelTeleporter implements PConstants {
 	final int PIXEL_BUFFER_SIZE=8192;  //  room for 2048 pixels, plus a bit
 
 	/**
-	 * Creates and initializes a PixelTeleporter object  .
+	 * Creates and initializes a PixelTeleporter object.
 	 *
 	 * @param pApp Pointer to currently running PApplet
-	 * @param ipAddr IPv4 address of PixelTeleporter transmitter
-	 * @param port Port number to listen on. 8081 is usual.
-	 */
-	public PixelTeleporter(PApplet pApp,String ipAddr,int port) {
+	 * @param ipAddr IPv4 address of PixelTeleporter server device
+	 * @param serverPort Command receiver port on server device. Default: 8081  
+	 * @param clientPort Port number to listen on. Default: 8082
+ 	 */
+	public PixelTeleporter(PApplet pApp,String ipAddr,int serverPort,int clientPort) {
 		this.app = pApp;	
 		mover = new Mover(this); 
-		thread = new PixelTeleporterThread(this,ipAddr,port,PIXEL_BUFFER_SIZE);
+		thread = new PixelTeleporterThread(this,ipAddr,clientPort,serverPort,PIXEL_BUFFER_SIZE);
 
 		// register cleanup function
 		app.registerMethod("dispose", this);
@@ -89,6 +90,34 @@ public class PixelTeleporter implements PConstants {
 		app.sphereDetail(8);         // reduce number of sphere vertices for performance		
 
 		welcome();
+	}
+	
+	/**
+	 * Creates and initializes a PixelTeleporter object.  Alternate constructor
+	 * to avoid breaking old scripts and firmware, this sets both client
+	 * and server ports to the specified value.  
+	 * !!!! It will definitely not work with any server/bridge software version after 1.0.0 
+	 * Please update/reflash your devices and use the new version which requires two
+	 * ports.
+	 *
+	 * @param pApp Pointer to currently running PApplet
+	 * @param ipAddr IPv4 address of PixelTeleporter server device
+	 * @param clientPort Port number to listen on. Default: 8081
+	 * @param serverPort Command receiver port on server device to receive commands. Default: 8082  
+	 */
+	public PixelTeleporter(PApplet pApp,String ipAddr,int clientPort) {
+		this(pApp,ipAddr,clientPort,clientPort);
+	}
+	
+	/**
+	 * Creates and initializes a PixelTeleporter object using default server/client
+	 * UDP ports (8081,8082)
+	 *
+	 * @param pApp Pointer to currently running PApplet
+	 * @param ipAddr IPv4 address of PixelTeleporter server device
+	 */
+	public PixelTeleporter(PApplet pApp,String ipAddr) {
+		this(pApp,ipAddr,8081,8082);
 	}
 
 	/**

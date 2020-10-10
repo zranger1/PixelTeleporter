@@ -28,7 +28,8 @@ class PixelTeleporterThread extends Thread {
 
 	PixelTeleporter parent;
 	DatagramSocket ds; 
-	int port;
+	int clientPort;
+	int serverPort;
 	byte[] buffer;
 	byte[] sendbuf;
 	DatagramPacket datagramIn;
@@ -36,22 +37,25 @@ class PixelTeleporterThread extends Thread {
 
 	boolean running;   
 	int status;
-
-	PixelTeleporterThread(PixelTeleporter parent,String ipAddr,int port, int bufsize) {
-		this.port = port;  
+	
+	PixelTeleporterThread(PixelTeleporter parent,String ipAddr,
+			              int clientPort, int serverPort, int bufsize) {
+		this.clientPort = clientPort;
+		this.serverPort = serverPort;
 		buffer = new byte[bufsize];
 		sendbuf = new byte[128];  
 		sendbuf[0] = CMD_REQUEST_FRAME;  
 		datagramIn = new DatagramPacket(buffer, buffer.length); 
 
-		InetSocketAddress sourceAddress = new InetSocketAddress(ipAddr,8081);    
+		InetSocketAddress sourceAddress = new InetSocketAddress(ipAddr,serverPort);    
 		datagramOut = new DatagramPacket(sendbuf,4,sourceAddress);
 
 		status = UDP_NONE;
 
 		try {
-			ds = new DatagramSocket(port);
-			ds.setSoTimeout(60);
+			ds = new DatagramSocket(null);
+			ds.setSoTimeout(0);
+			ds.bind(new InetSocketAddress(clientPort));
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}

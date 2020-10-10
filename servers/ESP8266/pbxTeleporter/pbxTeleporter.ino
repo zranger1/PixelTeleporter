@@ -33,9 +33,11 @@
 Stream* logger;
 
 // Network setup
-#define _SSID "HighlySecureSSID"  // Your WiFi SSID goes here.  
-#define _PASS "Password12345"     // Your WiFi password goes here.
-#define _PORT 8081
+// REMOVE PASSWORD & SSID BEFORE SHIPPING!!!!!!!!!!!
+#define _SSID "SSID"              // Your WiFi SSID goes here.  
+#define _PASS "WOWGREATPASSWORD"  // Your WiFi password goes here.
+#define LISTEN_PORT 8081          // UDP port on which pbxTeleporter listens for commands
+#define DATA_OUT_PORT 8082        // UDP port on client to which we send data
 
 WiFiUDP Udp;
 IPAddress targetIP;
@@ -47,7 +49,7 @@ IPAddress targetIP;
 #define MIN_SEND_INTERVAL 17   // milliseconds - (16.6667ms == 60 fps)
 uint64_t sendTimer = 0;
 
-// TODO - per channel buffers so we can forward to multiple clients??
+// TODO - per channel buffers for virtual wiring
 // For now, we just concatenate pixel data and forward it all to the client
 // on request.
 // TODO -- in V2 support color order.
@@ -135,8 +137,6 @@ uint8_t readOneByte() {
 // returns true if we've found the magic word "UPXL"
 // false otherwise. Clunky, but fast.
 bool readMagicWord() {
-  uint8_t ch;
-
   if (readOneByte() != 'U') return false;
   if (readOneByte() != 'P') return false;
   if (readOneByte() != 'X') return false;
@@ -147,8 +147,9 @@ bool readMagicWord() {
 
 // crcCheck()
 // read and discard 32-bit CRC from data buffer 
-// TODO -- we probably need to implement this eventually. Errors
-// have been almost nonexistent thus far.
+// TODO -- for virtual wiring, we need to check this before passing
+// channel data on to the clients.  For use with Processing, crc
+// errors have been nonexistent, so it really isn't needed.
 void crcCheck() { 
     uint32_t crc;
     readBytes((uint8_t *) &crc,sizeof(crc));
@@ -180,7 +181,6 @@ void doSetChannelWS2812() {
 // read pixel data in APA 102 format
 void doSetChannelAPA102() {
   PBAPA102DataChannel ch;
-  uint16_t data_length;
   
   readBytes((uint8_t *) &ch,sizeof(ch));
 
@@ -201,12 +201,11 @@ void doSetChannelAPA102() {
 
 // draw all pixels on all channels using current data
 void doDrawAll() {
-
   int packetSize = Udp.parsePacket();
   if (packetSize) {   
     uint16_t data_size = pixel_ptr - pixel_buffer;    
     if (data_size) {
-      Udp.beginPacket(Udp.remoteIP(),Udp.remotePort());
+      Udp.beginPacket(Udp.remoteIP(),DATA_OUT_PORT);
       Udp.write(pixel_buffer,data_size);  
       Udp.endPacket(); 
     } 
@@ -251,7 +250,7 @@ void setup() {
   WiFi.begin(_SSID,_PASS);
 
   logger->print("\n\n\n");
-  logger->println("Pixel Teleporter WiFi Bridge");
+  logger->println("pbxTeleporter - Pixel Teleporter Bridge v1.0.1 for ESP8266");
   logger->println("Connecting to wifi...");
   while(WiFi.status() != WL_CONNECTED) {
     logger->print('.');
@@ -261,9 +260,10 @@ void setup() {
   logger->println("Connected!");
   logger->print("IP address: ");
   logger->println(WiFi.localIP());  
-  logger->printf("Port %d\n", _PORT);
+  logger->printf("pbxTeleporter listening on %d, responding on %d\n",
+                 LISTEN_PORT,DATA_OUT_PORT);
   
-  Udp.begin(_PORT);    
+  Udp.begin(LISTEN_PORT);    
 
   pixel_ptr = pixel_buffer;
 
