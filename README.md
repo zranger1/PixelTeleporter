@@ -71,7 +71,7 @@ to help you quickly improve your coding and graphics skills.
 You'll also need a computer with reasonably modern OpenGL compatible graphics hardware, running any OS that Processing 3 supports.  Faster is better.  
 
 ## Installing the Library into Processing
-To install, you will need to [download PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.1.0) and
+To install, you will need to [download PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/1.1.0) and
 manually copy it to the ```libraries``` folder of your Processing sketchbook.
 
 To find the Processing sketchbook on your computer, open the Preferences window from the Processing application (PDE) and look 
@@ -81,7 +81,7 @@ By default the following locations are used for your sketchbook folder:
   * For Mac users, the sketchbook folder is located in `~/Documents/Processing` 
   * For Windows users, the sketchbook folder is located in `My Documents/Processing`
 
-Download the latest release - [PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.1.0) from this repository.
+Download the latest release - [PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/1.1.0) from this repository.
 
 Unzip and copy the PixelTeleporter folder into the `libraries` folder in the Processing sketchbook.
 If `libraries` does not exist, (this is unlikely, but possible) you will need to create it.

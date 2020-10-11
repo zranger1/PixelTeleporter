@@ -1,6 +1,6 @@
-# pbxTeleporter for ESP8266 Setup 
+# pbxTeleporter for ESP8266
 
-## The Short Version
+## Setup - The Short Version
 To build the ESP8266 version of pbxTeleporter, you'll need the latest **Arduino IDE**, which can be downloaded from here:
 
 [Arduino IDE](https://www.arduino.cc/en/Main/Software)
