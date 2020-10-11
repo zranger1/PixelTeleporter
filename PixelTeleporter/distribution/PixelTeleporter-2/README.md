@@ -52,13 +52,16 @@ Pixelblaze compatible json map. See the new **MapIO** example for more informati
 Also... minor bug fixes in viewport management and ongoing cosmetic touchup of examples.
 
 ## Requirements
-A **server device**. These are the currently supported servers:
-- **Raspberry Pi 3** or newer, running Raspbian or other Linux
-- **Desktop/Laptop computer**, running Linux or Windows. (The Linux server has been tested on Debian 10 and Ubuntu 18.04. It will *probably* work on OSX - I currently have no way to test it though.)
-- **ESP8266 microcontroller** - I used a NodeMCU 1.0 board for development, but there are many suitable boards.
-- **An FTDI USB->Serial adapter** - you'll need one of these for the Linux and Windows servers.  (I highly recommend adding one to your toolbox in any case 
+A **server device**. These are the currently supported server platforms:
+- **[Raspberry Pi](./servers/Pi)** For Raspberry Pi, running Raspbian or other Linux
+- **[Linux](./servers/Linux)**, For most common Linux distros -- tested on Debian 10 and Ubuntu 18.04.
+- **[Windows](./servers/Windows)** For Windows 7 - 10.
+- **[ESP8266 microcontroller](./servers/ESP8266)** - I used a NodeMCU 1.0 board for development, but there are many suitable boards.
+
+**An FTDI USB->Serial adapter** - you'll need one of these for the Linux and Windows servers.  (I highly recommend adding one to your toolbox in any case 
 if you don't own one already. Inexpensive and useful for any number of programming and debugging tasks.)
-- **[Processing 3](https://www.processing.org/download/)** - Processing is a very easy to use Java based graphics and prototyping environment.  If you 
+
+**[Processing 3](https://www.processing.org/download/)** - Processing is a very easy to use Java based graphics and prototyping environment.  If you 
 haven't used it before, you're in for a treat.  
 
 Basic familiarity with the hardware and a little coding skill are helpful. But if you're new to this, no worries.
@@ -68,8 +71,8 @@ to help you quickly improve your coding and graphics skills.
 You'll also need a computer with reasonably modern OpenGL compatible graphics hardware, running any OS that Processing 3 supports.  Faster is better.  
 
 ## Installing the Library into Processing
-To install the library, you will need to download the latest version of PixelTeleporter.zip
-from the "Releases" section of the repository and manually copy it to the ```libraries``` folder of your Processing sketchbook.
+To install, you will need to [download PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.1.0) and
+manually copy it to the ```libraries``` folder of your Processing sketchbook.
 
 To find the Processing sketchbook on your computer, open the Preferences window from the Processing application (PDE) and look 
 for the "Sketchbook location" item at the top.
@@ -78,7 +81,7 @@ By default the following locations are used for your sketchbook folder:
   * For Mac users, the sketchbook folder is located in `~/Documents/Processing` 
   * For Windows users, the sketchbook folder is located in `My Documents/Processing`
 
-Download the latest release - [PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.0.0) from this repository.
+Download the latest release - [PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.1.0) from this repository.
 
 Unzip and copy the PixelTeleporter folder into the `libraries` folder in the Processing sketchbook.
 If `libraries` does not exist, (this is unlikely, but possible) you will need to create it.
