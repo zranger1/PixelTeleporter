@@ -15,6 +15,11 @@ The server then forwards the pixel data across your LAN to the computer running 
 The Processing library make it simple to write sketches to receive the data and draw the pixels in 3D on your computer.
 With this toolset and the included  examples, you can quickly prototype almost any physical arrangement of LEDs.
 
+## Version 1.1.1 (10/21/2020) What's New
+Support for multiple Pixelblazes. (See new DualMatrix example)
+Added Fermat Spiral (Fibonacci256) example.
+BETA: You can now use the "l" key while your sketch is running to toggle the display of wiring labels -- the index of each pixel. 
+ 
 ## Version 1.1.0 (10/08/2020) What's New
 **Support for Raspberry Pi and FTDI USB-to-Serial boards on Linux & Windows**
 
@@ -71,7 +76,7 @@ to help you quickly improve your coding and graphics skills.
 You'll also need a computer with reasonably modern OpenGL compatible graphics hardware, running any OS that Processing 3 supports.  Faster is better.  
 
 ## Installing the Library into Processing
-To install, you will need to [download PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.1.0) and
+To install, you will need to [download PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/1.1.0) and
 manually copy it to the ```libraries``` folder of your Processing sketchbook.
 
 To find the Processing sketchbook on your computer, open the Preferences window from the Processing application (PDE) and look 
@@ -81,7 +86,7 @@ By default the following locations are used for your sketchbook folder:
   * For Mac users, the sketchbook folder is located in `~/Documents/Processing` 
   * For Windows users, the sketchbook folder is located in `My Documents/Processing`
 
-Download the latest release - [PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/v1.1.0) from this repository.
+Download the latest release - [PixelTeleporter.zip](https://github.com/zranger1/PixelTeleporter/releases/tag/1.1.0) from this repository.
 
 Unzip and copy the PixelTeleporter folder into the `libraries` folder in the Processing sketchbook.
 If `libraries` does not exist, (this is unlikely, but possible) you will need to create it.
@@ -179,7 +184,6 @@ The following controls are available in all examples:
 - 'r' key: Reset rotation.
 
 The included examples are:
-
 ### Matrix
 All 2048 pixels in a 32x64 matrix.  Use with the default Pixelblaze matrix mapper.
 (Be sure to set width in the mapping function and comment out any line that
@@ -188,6 +192,10 @@ references zigzag wiring.)
 ### Ring
 Simulated LED ring.  Adjustable radius and start and stop angles.  The Pixelblaze
 ring mapper is optional.
+
+### Fermat Spiral
+256 pixels arranged in a Fermat spiral (Fibonacci256) pattern.  Does not
+require a mapper to make 1D patterns do very interesting things.
 
 ### Walled Cube
 600 pixel (10x10) walled cube.  Use with the walled cube mapping function from

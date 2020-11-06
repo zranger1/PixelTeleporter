@@ -36,7 +36,6 @@ import processing.data.JSONArray;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
-// TODO: Auto-generated Javadoc
 /**
     Manages communication with the PixelTeleporter server device
     and provides a framework for object rendering and basic user 
@@ -54,8 +53,13 @@ public class PixelTeleporter implements PConstants {
 	int pixelSize = 20;      
 	boolean uiActive = false;
 	boolean autoDataActive = false;
+	boolean isController = false;
+	static boolean showWiringLabels = false;
 	private final ptEventListener ptEventListener = new ptEventListener();	
-
+	
+	// global pt object reference counter 
+    static int refCount = 0; 
+    
 	//constants
 	public final static String VERSION = "##library.prettyVersion##";	
 	final int PIXEL_BUFFER_SIZE=8192;  //  room for 2048 pixels, plus a bit
@@ -72,26 +76,31 @@ public class PixelTeleporter implements PConstants {
 		this.app = pApp;	
 		mover = new Mover(this); 
 		thread = new PixelTeleporterThread(this,ipAddr,clientPort,serverPort,PIXEL_BUFFER_SIZE);
+		refCount++;
 
 		// register cleanup function
 		app.registerMethod("dispose", this);
 
-		// enable keyboard/mouse UI
-		enableUI();
-
 		// enable automatic per frame data request/read
 		enableAutoData();				
 
-		// configure default drawing settings
-		app.colorMode(RGB, 255);     // RGB color, values from 0-255
-		app.noStroke();              // no outlining
-		app.rectMode(CENTER);        // Rectangles are positioned based on their center.
-		app.ellipseMode(CENTER);     // Ellipses are positioned based on their center.  
-		app.sphereDetail(8);         // reduce number of sphere vertices for performance		
+		// if we're the first PixelTeleporter object, enable keyboard/mouse UI,
+		// configure default drawing settings and print welcome message
+		if (refCount == 1) {
+			isController = true;
+			enableUI();
+			
+			app.colorMode(RGB, 255);     // RGB color, values from 0-255
+			app.textMode(MODEL);         // draw text as textures
+			app.noStroke();              // no outlining
+			app.rectMode(CENTER);        // Rectangles are positioned based on their center.
+			app.ellipseMode(CENTER);     // Ellipses are positioned based on their center.  
+			app.sphereDetail(8);         // reduce number of sphere vertices for performance
 
-		welcome();
+			welcome();
+		}		
 	}
-	
+
 	/**
 	 * Creates and initializes a PixelTeleporter object.  Alternate constructor
 	 * to avoid breaking old scripts and firmware, this sets both client
@@ -193,7 +202,36 @@ public class PixelTeleporter implements PConstants {
 	 */
 	public boolean autoDataEnabled() {
 		return autoDataActive;
+	}
+	
+	
+	/**
+	 * Enable display of pixel index numbers
+	 *
+	 * @return true if enabled, false if disabled
+	 */
+	public void enableWiringLabels() {
+		showWiringLabels = true;
 	}	
+	
+	/**
+	 * Enable display of pixel index numbers
+	 *
+	 * @return true if enabled, false if disabled
+	 */
+	public void disableWiringLabels() {
+		showWiringLabels = false;
+	}	
+	
+	/**
+	 * Returns state of PixelTeleporter's pixel index order labeling
+	 *
+	 * @return true if enabled, false if disabled
+	 */
+	public boolean wiringLabelsEnabled() {
+		return showWiringLabels;
+	}
+
 
 	/**
 	 *  Start data transport.
@@ -295,6 +333,7 @@ public class PixelTeleporter implements PConstants {
 		disableUI();
 		disableAutoData();
 		thread.quit();
+		refCount--;
 	}  
 
 	/**
@@ -431,9 +470,22 @@ public class PixelTeleporter implements PConstants {
 	 * @param obj list of ScreenLEDs representing an LED object or panel.
 	 */
 	public void render3D(LinkedList <ScreenLED> obj) {
-		for (ScreenLED led : obj) {
-			led.draw3D();
-		}    			
+		app.pushMatrix();
+		mover.applyObjectTransform();	
+
+		if (showWiringLabels) {
+			app.textAlign(CENTER,CENTER);
+			app.textSize(pixelSize);
+			for (ScreenLED led : obj) {
+				led.drawWiringLabel();
+			}   						
+		}
+		else {
+			for (ScreenLED led : obj) {
+				led.draw3D();
+			}    
+		}
+		app.popMatrix();
 	}
 
 	/**
@@ -443,14 +495,27 @@ public class PixelTeleporter implements PConstants {
 	 * @param obj list of ScreenLEDs representing an LED object or panel.
 	 */	
 	public void render2D(LinkedList <ScreenLED> obj) {
-		for (ScreenLED led : obj) {
-			led.draw2D();
-		}    			
+		app.pushMatrix();
+		mover.applyObjectTransform();
+
+		if (showWiringLabels) {
+			app.textAlign(CENTER,CENTER);	
+			app.textSize(pixelSize);			
+			for (ScreenLED led : obj) {
+				led.drawWiringLabel();
+			}   						
+		}
+		else {
+			for (ScreenLED led : obj) {
+				led.draw2D();
+			}   
+		}
+		app.popMatrix();
 	}
 
 	public void pre() {
 		readData();
-		applyViewingTransform();
+		if (isController) applyViewingTransform();
 	}
 
 	public void post() {
@@ -486,6 +551,8 @@ public class PixelTeleporter implements PConstants {
 					mover.mouseRotation.x = 0;
 					mover.mouseRotation.y = 0;
 					break;
+				case 'l':
+					showWiringLabels = !showWiringLabels;
 				default:
 					break;
 				} 			

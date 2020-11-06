@@ -87,6 +87,16 @@ class Mover implements PConstants{
 		parent.app.rotateX(-mouseRotation.y);
 		parent.app.rotateY(mouseRotation.x);
 	}
+	
+	void applyObjectTransform() {
+		
+	   parent.app.translate(-objectCenter.x,-objectCenter.y,-objectCenter.z);  
+		if (autoMove) {
+			PVector deltaRotation = PVector.mult(rotationRate,(float) parent.app.millis()-timer);
+			addAndNormalize(currentRotation,deltaRotation);
+		}	 
+		timer = parent.app.millis();		
+	}
 
 	void applyViewingTransform() { 
 		moveCamera();    
@@ -94,16 +104,16 @@ class Mover implements PConstants{
 
 		applyMouseRotation();
 
-		if (autoMove) {
-			PVector deltaRotation = PVector.mult(rotationRate,(float) parent.app.millis()-timer);
-			addAndNormalize(currentRotation,deltaRotation);
-		}
+//		if (autoMove) {
+//			PVector deltaRotation = PVector.mult(rotationRate,(float) parent.app.millis()-timer);
+//			addAndNormalize(currentRotation,deltaRotation);
+//		}
 
-		timer = parent.app.millis();
+//		timer = parent.app.millis();
 
 		parent.app.rotateX(currentRotation.x);
 		parent.app.rotateY(currentRotation.y);
 		parent.app.rotateZ(currentRotation.z);
-		parent.app.translate(-objectCenter.x,-objectCenter.y,-objectCenter.z);     
+//		parent.app.translate(-objectCenter.x,-objectCenter.y,-objectCenter.z);     
 	} 
 }

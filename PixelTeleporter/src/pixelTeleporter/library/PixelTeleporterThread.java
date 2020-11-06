@@ -101,7 +101,7 @@ class PixelTeleporterThread extends Thread {
 				buffer[i] = Byte.toUnsignedInt(data[i++]);  //g
 				buffer[i] = Byte.toUnsignedInt(data[i++]);  //b             
 			}
-			status = UDP_NONE;   
+			status = UDP_NONE;  
 			return datagramIn.getLength() / 3;
 		}
 		else {
