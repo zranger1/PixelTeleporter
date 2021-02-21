@@ -1,7 +1,7 @@
 package pixelTeleporter.library;
 
-import processing.core.PConstants;
-import processing.core.PVector;
+import processing.core.*;
+import processing.opengl.PGraphics3D;
 
 /**
  * Handles object and camera translation/rotation.
@@ -13,6 +13,7 @@ class Mover implements PConstants{
 	int[] pixelBuffer;       // buffer for incoming network data
 
 	//camera position  
+	float DEFAULT_CAMERA_DISTANCE = 1000;
 	PVector origin;
 	PVector eye;
 
@@ -22,8 +23,9 @@ class Mover implements PConstants{
 	PVector rotationRate;
 	boolean autoMove; 
 
-	//rotation controlled by mouse drag  
+	//rotation & translation controlled by mouse drag  
 	PVector mouseRotation;
+	PVector mouseTranslation;
 
 	int timer;
 	float dragOriginX;
@@ -38,14 +40,14 @@ class Mover implements PConstants{
 		//camera    
 		origin = new PVector(parent.app.width / 2, parent.app.height / 2, -200);
 		eye = origin.copy();
-		eye.z = 1000;
+		eye.z = DEFAULT_CAMERA_DISTANCE;
 
 		//vectors for object movement/rotation    
 		objectCenter = new PVector(0,0,0);
 		currentRotation = new PVector(0,0,0);
 		rotationRate = new PVector(0,0,0);
 		mouseRotation = new PVector(0,0,0);
-		mouseZoom = 0;
+		mouseTranslation = new PVector(0,0,0);
 		autoMove = true;
 
 		initializeCamera();
@@ -65,15 +67,15 @@ class Mover implements PConstants{
 	
 	void setRotationRate(float x, float y, float z) { rotationRate.set(x,y,z); } 
 
-	public void initializeCamera() {   
-		parent.app.camera(eye.x,eye.y,eye.z,       // looking from...
-				origin.x,origin.y,objectCenter.z,  // looking at...
-				0, 1, 0);                          // upX, upY, upZ    
-
-		mouseZoom = 0;     
+	public void initializeCamera() { 
+		parent.app.camera(eye.x,eye.y,eye.z,      // looking from...
+				origin.x,origin.y,objectCenter.z, // looking at...
+				0, 1, 0);                         // upX, upY, upZ    				
+      moveCamera();   
 	}
 
 	public void moveCamera() {     
+
 		parent.app.camera(eye.x,eye.y,eye.z,      // looking from...
 				origin.x,origin.y,objectCenter.z, // looking at...
 				0, 1, 0);                         // upX, upY, upZ     
@@ -84,8 +86,10 @@ class Mover implements PConstants{
 	}    
 
 	void applyMouseRotation() {
+		parent.app.translate(mouseTranslation.x,mouseTranslation.y,0);    	
 		parent.app.rotateX(-mouseRotation.y);
 		parent.app.rotateY(mouseRotation.x);
+		parent.app.rotateZ(mouseRotation.z);
 	}
 	
 	void applyObjectTransform() {
@@ -103,17 +107,9 @@ class Mover implements PConstants{
 		parent.app.translate(parent.app.width / 2,parent.app.height /2, 0);
 
 		applyMouseRotation();
-
-//		if (autoMove) {
-//			PVector deltaRotation = PVector.mult(rotationRate,(float) parent.app.millis()-timer);
-//			addAndNormalize(currentRotation,deltaRotation);
-//		}
-
-//		timer = parent.app.millis();
-
+	
 		parent.app.rotateX(currentRotation.x);
 		parent.app.rotateY(currentRotation.y);
 		parent.app.rotateZ(currentRotation.z);
-//		parent.app.translate(-objectCenter.x,-objectCenter.y,-objectCenter.z);     
 	} 
 }

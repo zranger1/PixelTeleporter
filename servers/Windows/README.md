@@ -31,6 +31,9 @@ Set LED type to  WS2812, in RGB order. (APA102 in RGB order also works).  Note t
 channel. PixelTeleporter supports a maximum of 2048 LEDs -- 8 channels of 256.  Be sure to press the Start Index "Auto" 
 button to set the starting index for each channel if you use more than one.
 
+Once you're successfully set up and connected, pbxTeleporter window will display a "Connected" message,
+along with the count of pixels it is currently receiving from the Pixelblaze.
+
 Configure your mapping function if needed, and set your pattern.
 
 ## Notes 

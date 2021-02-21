@@ -6,11 +6,20 @@ To build the ESP8266 version of pbxTeleporter, you'll need the latest **Arduino 
 [Arduino IDE](https://www.arduino.cc/en/Main/Software)
 
 Once you've installed the Arduino IDE, use the "Boards Manager..." menu item to 
-install the ESP8266 board support package.  See the ESP8266 detailed setup instructions below.
-- Set the SSID and password for your network in servers/ESP8266/pbxTeleporter.ino
-- Set the serial upload rate to 115000 baud
-- Compile and upload the sketch with the serial monitor open.  Take note of the ESP's IP address.
-- Connect Pixelblaze's Data line to GPIO13 (D7) on the ESP.  Power both devices appropriately.
+install the ESP8266 board support package.  Then, use the IDE's "Tools" menu, configure
+board options as follows:
+- Board: "NodeMCU 1.0 (ESP-12E Module) - this is a reasonable default. If you have a 
+different board and it's available in the options, by all means, use it.
+- CPU Frequency: 160Mhz - probably the most important option.  Pixel Teleporter may not work
+correctly if you leave this set to the default 80Mhz.
+- IwIP variant: "v2 Higher Bandwidth"
+- Upload Speed: "115200"
+
+Once board options are configured, in the pbxTeleporter sketch, set the correct SSID and 
+password for your network. When this is done:
+- Connect Pixelblaze's Data line to GPIO13 (D7) on the ESP.  Power both devices appropriately, making
+sure that they share a common ground.
+- Compile and upload the sketch with the serial monitor open. Take note of the ESP's IP address.
 - The Pixelblaze version of PixelTeleporter emulates an 8 channel expansion board, so set LED type
 on the Pixelblaze to "Pixelblaze Output Expander".  Set your output channels up as necessary for 
 WS2812 w/RGB order. Don't forget to set the start index for each channel you're using. For now,

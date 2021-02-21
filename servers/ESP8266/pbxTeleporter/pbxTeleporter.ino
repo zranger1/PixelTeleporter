@@ -1,17 +1,18 @@
 /* pbxTeleporter.ino
  *  
- * ESP8266 PixelTeleporter Server for PixelBlaze   
- * Requires installation of ESP8266 board support for Arduino IDE
- *  
- * Reads data from a Pixelblaze by emulating a single (8 channel, 2048 pixel) output expander 
+ * Serial -> UDP Bridge for Pixelblaze
+ * ESP8266 version
+ *
+ * Reads data from a Pixelblaze by emulating a single (8 channel, 2048 pixel) output expander
  * board and forwards it over the network via UDP datagram on request.  The wire protocol is
  * described in Ben Hencke's Pixelblaze Output Expander board repository at:
  * https://github.com/simap/pixelblaze_output_expander
  * 
+ * Requires installation of ESP8266 board support for Arduino IDE* 
+ *
  * Part of the PixelTeleporter project
- * 2020 by JEM (ZRanger1) 
- * Use as you will, have fun, if you find it useful maybe buy me a 
- * beer at a conferece sometime...
+ * 2020 by JEM (ZRanger1)
+ * Distributed under the MIT license
  * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -33,9 +34,8 @@
 Stream* logger;
 
 // Network setup
-// REMOVE PASSWORD & SSID BEFORE SHIPPING!!!!!!!!!!!
-#define _SSID "SSID"              // Your WiFi SSID goes here.  
-#define _PASS "WOWGREATPASSWORD"  // Your WiFi password goes here.
+//#define _SSID "SSID"              // Your WiFi SSID goes here.  
+//#define _PASS "WOWGREATPASSWORD"  // Your WiFi password goes here.
 #define LISTEN_PORT 8081          // UDP port on which pbxTeleporter listens for commands
 #define DATA_OUT_PORT 8082        // UDP port on client to which we send data
 
@@ -76,7 +76,7 @@ typedef struct {
 //    int8_t magic[4];
     uint8_t channel;
     uint8_t command;
-} PBFrameHeader  __attribute__((packed));
+} __attribute__((packed)) PBFrameHeader;
 
 typedef struct {
     uint8_t numElements; //0 to disable channel, usually 3 (RGB) or 4 (RGBW)
@@ -84,10 +84,10 @@ typedef struct {
         struct {
             uint8_t redi :2, greeni :2, bluei :2, whitei :2; //color orders, data on the line assumed to be RGB or RGBW
         };
-        uint8_t colorOrders __attribute__((packed));
+        uint8_t colorOrders ;
     };
     uint16_t pixels;
-} PBWS2812Channel __attribute__((packed));
+} __attribute__((packed)) PBWS2812Channel ;
 
 typedef struct {
     uint32_t frequency;
@@ -95,14 +95,14 @@ typedef struct {
         struct {
             uint8_t redi :2, greeni :2, bluei :2; //color orders, data on the line assumed to be RGB
         };
-        uint8_t colorOrders __attribute__((packed));
+        uint8_t colorOrders;
     };
     uint16_t pixels;
-} PBAPA102DataChannel __attribute__((packed));
+} __attribute__((packed)) PBAPA102DataChannel ;
 
 typedef struct {
     uint32_t frequency;
-} PBAPA102ClockChannel __attribute__((packed));
+}  __attribute__((packed)) PBAPA102ClockChannel;
 
 /////////////////////////////////
 // Utility Functions
@@ -250,7 +250,7 @@ void setup() {
   WiFi.begin(_SSID,_PASS);
 
   logger->print("\n\n\n");
-  logger->println("pbxTeleporter - Pixel Teleporter Bridge v1.0.1 for ESP8266");
+  logger->println("pbxTeleporter - Pixel Teleporter Bridge v1.1.2 for ESP8266");
   logger->println("Connecting to wifi...");
   while(WiFi.status() != WL_CONNECTED) {
     logger->print('.');

@@ -1,5 +1,7 @@
 package pixelTeleporter.library;
 
+import processing.core.*;
+
 /**
  Represents individual "LEDs". 
  <p>
@@ -49,28 +51,9 @@ public class ScreenLED {
 		return index / 3;
 	}
 	
-	public void drawWiringLabel() {
-		int r,g,b,i;   
-		parent.app.pushMatrix();
-
-		parent.app.translate(x,y,z);
-		i = index;
-		r = parent.mover.pixelBuffer[i++];
-		g = parent.mover.pixelBuffer[i++];
-		b = parent.mover.pixelBuffer[i];
-		parent.app.fill(r,g,b,176);
-		parent.app.sphere(parent.ledSize);		
-		
-
-		parent.app.fill(130,255,255);			
-  	    parent.app.text(Integer.toString(getIndex()),
-  	    		        (float) 0.0,(float) 0.0,(float) parent.pixelSize);						
-	
-		parent.app.popMatrix();  							
-	}
-
 	public void draw2D() {
 		int r,g,b,i;   
+		
 		parent.app.pushMatrix();
 
 		parent.app.translate(x,y);
@@ -87,6 +70,7 @@ public class ScreenLED {
 	public void draw3D() {
 		int r,g,b,i;
 		float size,mag;
+		
 		parent.app.pushMatrix();    
 		parent.app.translate(x,y,z);
 

@@ -49,20 +49,22 @@ public class PixelTeleporter implements PConstants {
 	PApplet app;	
 	PixelTeleporterThread thread;
 	Mover mover;
+	BackgroundImage bg;
 	int ledSize = 15;        
 	int pixelSize = 20;      
 	boolean uiActive = false;
 	boolean autoDataActive = false;
 	boolean isController = false;
-	static boolean showWiringLabels = false;
-	private final ptEventListener ptEventListener = new ptEventListener();	
-	
+	static boolean showPixelInfo = false;
+	private final ptEventListener ptEventListener = new ptEventListener();
+
 	// global pt object reference counter 
     static int refCount = 0; 
     
 	//constants
 	public final static String VERSION = "##library.prettyVersion##";	
 	final int PIXEL_BUFFER_SIZE=8192;  //  room for 2048 pixels, plus a bit
+	final int MOUSE_MIN_MOVEMENT = 10; // dead zone for mouse UI rotate/translate
 
 	/**
 	 * Creates and initializes a PixelTeleporter object.
@@ -74,8 +76,10 @@ public class PixelTeleporter implements PConstants {
  	 */
 	public PixelTeleporter(PApplet pApp,String ipAddr,int serverPort,int clientPort) {
 		this.app = pApp;	
+		
 		mover = new Mover(this); 
 		thread = new PixelTeleporterThread(this,ipAddr,clientPort,serverPort,PIXEL_BUFFER_SIZE);
+		bg = new BackgroundImage(app);
 		refCount++;
 
 		// register cleanup function
@@ -89,7 +93,7 @@ public class PixelTeleporter implements PConstants {
 		if (refCount == 1) {
 			isController = true;
 			enableUI();
-			
+
 			app.colorMode(RGB, 255);     // RGB color, values from 0-255
 			app.textMode(MODEL);         // draw text as textures
 			app.noStroke();              // no outlining
@@ -206,21 +210,21 @@ public class PixelTeleporter implements PConstants {
 	
 	
 	/**
-	 * Enable display of pixel index numbers
+	 * Enable display of per pixel tooltips on mouse hover
 	 *
 	 * @return true if enabled, false if disabled
 	 */
-	public void enableWiringLabels() {
-		showWiringLabels = true;
+	public void enablePixelInfo() {
+		showPixelInfo = true;
 	}	
 	
 	/**
-	 * Enable display of pixel index numbers
+	 * Disable display of per pixel tooltips on mouse hover
 	 *
 	 * @return true if enabled, false if disabled
 	 */
-	public void disableWiringLabels() {
-		showWiringLabels = false;
+	public void disablePixelInfo() {
+		showPixelInfo = false;
 	}	
 	
 	/**
@@ -228,10 +232,9 @@ public class PixelTeleporter implements PConstants {
 	 *
 	 * @return true if enabled, false if disabled
 	 */
-	public boolean wiringLabelsEnabled() {
-		return showWiringLabels;
+	public boolean pixelInfoEnabled() {
+		return showPixelInfo;
 	}
-
 
 	/**
 	 *  Start data transport.
@@ -323,6 +326,19 @@ public class PixelTeleporter implements PConstants {
 	 */		
 	public void setRotationRate(float x, float y, float z) { mover.setRotationRate(x,y,z); } 
 
+	/**
+	 * Loads an image file for to use as a background.  Supported formats are: 
+	 * (.gif, .jpg, .tga, and .png)
+	 *  
+	 * If the file is not available or an error occurs, no background will be created and
+	 * a non-fatal error message will be printed to the console.
+	 * 
+	 * @param imgPath An absolute path to a local file, or the URL of an image on the Web.
+	 */		
+	public void setBackgroundImage(String imgPath) {
+		bg.load(imgPath);
+	} 	
+	
 	/**
  		Called when the library shuts down.
  		<p>
@@ -473,19 +489,10 @@ public class PixelTeleporter implements PConstants {
 		app.pushMatrix();
 		mover.applyObjectTransform();	
 
-		if (showWiringLabels) {
-			app.textAlign(CENTER,CENTER);
-			app.textSize(pixelSize);
-			for (ScreenLED led : obj) {
-				led.drawWiringLabel();
-			}   						
-		}
-		else {
-			for (ScreenLED led : obj) {
-				led.draw3D();
-			}    
-		}
-		app.popMatrix();
+		for (ScreenLED led : obj) {
+			led.draw3D();
+		}    
+		app.popMatrix();	
 	}
 
 	/**
@@ -498,22 +505,14 @@ public class PixelTeleporter implements PConstants {
 		app.pushMatrix();
 		mover.applyObjectTransform();
 
-		if (showWiringLabels) {
-			app.textAlign(CENTER,CENTER);	
-			app.textSize(pixelSize);			
-			for (ScreenLED led : obj) {
-				led.drawWiringLabel();
-			}   						
-		}
-		else {
-			for (ScreenLED led : obj) {
-				led.draw2D();
-			}   
-		}
+		for (ScreenLED led : obj) {
+			led.draw2D();
+		}   
 		app.popMatrix();
 	}
 
 	public void pre() {
+		bg.showImage(); 
 		readData();
 		if (isController) applyViewingTransform();
 	}
@@ -546,13 +545,23 @@ public class PixelTeleporter implements PConstants {
 				case ' ': // stop automatic rotation
 					mover.autoMove = !mover.autoMove;
 					break;
-				case 'r': //reset rotation
+				case 'r': //reset rotation & translation for foreground and back
 					mover.setRotation(0,0,0);
-					mover.mouseRotation.x = 0;
-					mover.mouseRotation.y = 0;
+					mover.mouseRotation.set(0,0,0);
+					mover.mouseTranslation.set(0,0,0);
+					mover.initializeCamera();
+				    break;
+				case 'R':
+					bg.resetBackground();
 					break;
-				case 'l':
-					showWiringLabels = !showWiringLabels;
+				case 't':  // enable/disable tooltips on pixels
+					if (pixelInfoEnabled()) {
+						disablePixelInfo();
+					}
+					else {
+						enablePixelInfo();
+					}
+					break;
 				default:
 					break;
 				} 			
@@ -567,25 +576,70 @@ public class PixelTeleporter implements PConstants {
 		public void mouseEvent(final MouseEvent e) {
 			float x = e.getX();
 			float y = e.getY();
+			float distX,distY,offsetX,offsetY;
 
 			switch (e.getAction()) {
 			case MouseEvent.WHEEL:
-				mover.zoomCamera(30 * e.getCount());				  
+				if (e.isShiftDown())  {
+					// if shift, zoom in/out on the background
+					float s = bg.getScale();
+					s = s - (0.05f * (float) (e.getCount()));
+					app.constrain(s,0.01f,1.5f);
+					bg.setScale(s);
+					bg.needScale = true;
+					bg.needClip = true;
+				}
+				else  {
+					mover.zoomCamera(30 * e.getCount());
+				}
+
 				break;
 			case MouseEvent.PRESS:
 				mover.dragOriginX = x;
 				mover.dragOriginY = y;
-
 				break;
-			case MouseEvent.DRAG:
-				if (e.getButton() == LEFT) {
-					//rotation based on distance from start of drag    
-					mover.mouseRotation.x = (x - mover.dragOriginX)/(app.width / 2) * TWO_PI;
-					mover.mouseRotation.y = (y - mover.dragOriginY)/(app.height / 2) * TWO_PI;
-				}			    	
-				break;				
+				
 			case MouseEvent.RELEASE:
 				break;
+				
+			case MouseEvent.DRAG:
+				distX = x - mover.dragOriginX;
+				distY = y - mover.dragOriginY;
+				mover.dragOriginX = x; 
+				mover.dragOriginY = y;	
+				
+				if (e.isShiftDown())  {
+					// if shift drag w/either key, move the background
+					bg.moveRect(distX,distY);	
+				}
+				else if (e.getButton() == LEFT) {
+					// rotation based on distance from start of drag with small dead zone to make
+					// it easier to control.
+					//offsetX = MOUSE_MIN_MOVEMENT * Math.signum(distX);
+					//distX = (app.abs(distX) > MOUSE_MIN_MOVEMENT) ? (distX-offsetX)/(app.width) * TWO_PI : 0;
+					distX = distX / app.width * TWO_PI;
+					distY = distY / app.height * TWO_PI;
+					
+					//offsetY = MOUSE_MIN_MOVEMENT * Math.signum(distY);
+					//distY = (app.abs(distY) > MOUSE_MIN_MOVEMENT) ? (distY-offsetY)/(app.height) * TWO_PI : 0;					
+					 				
+					// holding down alt rotates around the z axis only
+ 					if (e.isAltDown()) {
+ 						mover.mouseRotation.z += distY; 						 						
+ 					}
+ 					// otherwise rotate around x and y
+ 					else {
+ 	 					mover.mouseRotation.x += distX;
+ 						mover.mouseRotation.y += distY;
+ 					}
+				}
+				else if (e.getButton() == RIGHT) {
+					// scale translation so we move a little faster as the camera moves away.
+					float m = (mover.eye.z <= mover.DEFAULT_CAMERA_DISTANCE) ? 1 : mover.eye.z / mover.DEFAULT_CAMERA_DISTANCE;
+					mover.mouseTranslation.x += m * distX; 
+					mover.mouseTranslation.y += m * distY; 									
+				}
+				break;				
 			case MouseEvent.CLICK:
 				break;
 			case MouseEvent.MOVE:

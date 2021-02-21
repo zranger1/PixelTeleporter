@@ -4,6 +4,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.Arrays;
+
 import processing.core.*;
 
 /**
@@ -21,7 +23,10 @@ class PixelTeleporterThread extends Thread {
 	final int UDP_RECEIVED=0x03;
 
 	//empty array to return when no packet has been received.
-	final static byte [] NO_PACKET = {};
+//	final static byte [] NO_PACKET = {};
+	
+	// Timeout value, in milliseconds, for "disconnected" indicator
+	final int DISCONNECT_TIMEOUT = 5000;
 
 	//command to fetch a frame from the microcontroller.  
 	final static byte CMD_REQUEST_FRAME = (byte) 0xF0; 	
@@ -37,9 +42,11 @@ class PixelTeleporterThread extends Thread {
 
 	boolean running;   
 	int status;
+	int lastActivity;
 	
 	PixelTeleporterThread(PixelTeleporter parent,String ipAddr,
 			              int clientPort, int serverPort, int bufsize) {
+		this.parent = parent;
 		this.clientPort = clientPort;
 		this.serverPort = serverPort;
 		buffer = new byte[bufsize];
@@ -51,6 +58,7 @@ class PixelTeleporterThread extends Thread {
 		datagramOut = new DatagramPacket(sendbuf,4,sourceAddress);
 
 		status = UDP_NONE;
+		lastActivity = parent.app.millis();
 
 		try {
 			ds = new DatagramSocket(null);
@@ -63,6 +71,14 @@ class PixelTeleporterThread extends Thread {
 	
 	PApplet getApplet() {
 		return parent.app;
+	}
+
+	/** 
+	 * Returns true if we have recieved data or a ping from the
+	 * current server within the last DISCONNECT_TIMEOUT milliseconds  
+	 */	
+	public boolean isConnected() {
+		return ((parent.app.millis() - lastActivity) < DISCONNECT_TIMEOUT);		
 	}
 
 	/** 
@@ -82,6 +98,18 @@ class PixelTeleporterThread extends Thread {
 
 	public boolean available() {
 		return (status == UDP_RECEIVED);    
+	}
+	
+	
+	/**
+	 * Flash the entire pixel display light grey at a low frequency.
+	 * Used to signal that the server is disconnected.
+	 */	
+	int doDisconnectFlash(int [] buffer) {
+	  float bri = ((parent.app.millis() - lastActivity) % 3000f) / 3000f;
+	  if (bri > 0.5) bri = 1-bri;
+	  Arrays.fill(buffer,(int) (128 * bri));
+	  return buffer.length / 3;				
 	}
 
 	/** 
@@ -104,9 +132,11 @@ class PixelTeleporterThread extends Thread {
 			status = UDP_NONE;  
 			return datagramIn.getLength() / 3;
 		}
-		else {
-			return 0;
+		else if (!isConnected()) {
+          return doDisconnectFlash(buffer);
 		}
+		
+		return 0;
 	}      
 
 	public void start() {
@@ -132,6 +162,7 @@ class PixelTeleporterThread extends Thread {
 		if (status == UDP_REQUESTED) {  
 			try {
 				ds.receive(datagramIn);
+				lastActivity = parent.app.millis();
 			} 
 			catch (IOException e) { // catch those pesky timeouts
 				status = UDP_NONE;  
