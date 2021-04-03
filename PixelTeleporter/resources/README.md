@@ -15,21 +15,10 @@ The server then forwards the pixel data across your LAN to the computer running 
 The Processing library make it simple to write sketches to receive the data and draw the pixels in 3D on your computer.
 With this toolset and the included  examples, you can quickly prototype almost any physical arrangement of LEDs.
 
-## Version 1.1.2 (2/21/2021) What's New
-Many Quality-of-life and UI improvements:
-- You can now translate (pan) objects by right-dragging with the mouse.
-- Object rotation with the mouse is generally smoother and more responsive.
-- Holding down the alt key allows you to rotate your object around the Z axis.
-- added setBackgroundImage() method to Pixelteleporter object. Supported image formats are: 
- (.gif, .jpg, .tga, and .png).  (If you use setBackgroundImage, you can remove calls to background() from your sketches.)
-- Hold down the shift key while dragging to pan your background image
-- Hold down the shift key with the mouse wheel to zoom your background image
-- Connection status feedback!  When not receiving data from the pixelblaze, Pixelteleporter will now pulse between
- slowly between black and grey.  Display will resume when the connection is reestablished
-- More connection status feedback! pbxTeleporter for Windows now displays connection status and LED count in its main window.
-
-Also includes various small fixes and improvements to servers. 
-The beta wiring label feature has been removed for now.
+## Version 1.1.3 (4/03/2021) What's New
+Minor update - increased the maximum supported number of LEDs to 4096 per PixelTeleporter object, and 
+updated all the servers (except the ESP8266 version) to match.   The ESP8266 version still supports up
+to 2048 pixels.
 
 ## Previously...
 Information on previous versions has been moved to CHANGELOG.md  in this repository.
@@ -220,3 +209,6 @@ build the project and go!
 If this project saves you time and effort, please consider donating to help support further development.  Every donut or cup of coffee helps!  :-)
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=YM9DKUT5V34G8)
+
+
+  

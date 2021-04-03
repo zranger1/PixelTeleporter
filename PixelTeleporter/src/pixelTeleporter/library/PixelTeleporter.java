@@ -63,7 +63,8 @@ public class PixelTeleporter implements PConstants {
     
 	//constants
 	public final static String VERSION = "##library.prettyVersion##";	
-	final int PIXEL_BUFFER_SIZE=8192;  //  room for 2048 pixels, plus a bit
+	final int MAX_PIXELS = 4096;
+	final int PIXEL_BUFFER_SIZE=(256+(MAX_PIXELS * 3)); 
 	final int MOUSE_MIN_MOVEMENT = 10; // dead zone for mouse UI rotate/translate
 
 	/**

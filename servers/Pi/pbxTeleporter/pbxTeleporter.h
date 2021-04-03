@@ -15,9 +15,9 @@
 #ifndef __pbxteleporter_h__
 #define __pbxteleporter_h__
 
-#define MAX_PIXELS     2048
+#define MAX_PIXELS     4096
 #define RCV_BITRATE    2000000L           // bits/sec coming from pixelblaze
-#define BUFFER_SIZE    6150               // 2048 pixels plus a little
+#define BUFFER_SIZE    (256+(MAX_PIXELS * 3))
 #define DEFAULT_LISTEN_PORT 8081          // default UDP ports
 #define DEFAULT_SEND_PORT   8082
 

@@ -39,11 +39,6 @@ public class ScreenLED {
 	}
 
 	public void setIndex(int n) {
-		if (n >= 2048) {
-			System.out.println("EXTREMELY DIRE WARNING: Pixel index out of bounds in ScreenLED:setIndex. (max is 2047)");
-			System.out.println("I'd throw an exception, but frankly it's a pain in the butt for everyone, and I trust you to read!"); 
-			return;
-		} 
 		index = 3 * n;    
 	}
 

@@ -16,7 +16,7 @@ convenient directory.  Start the program by clicking on pbxTeleporter.exe in Exp
 
 pbxTeleporter for Windows is a Win32 GUI app -- it will present you with a normal Windows-ish menu of settings, for which it has
 determined reasonable defaults. The only option you will probably need to check is the Serial Port setting, available
-through the Settings menu.  Be sure that the selected serial port corresponds to your FTDI device.   
+through the Settings menu.  Be sure that the selected serial port corresponds to your FTDI device.  
 
 pbxTeleporter uses very little CPU and can safely run in the background while you're 
 doing other things.  You can minimize it at any point.  To stop pbxTeleporter, close its window
@@ -27,11 +27,14 @@ pbxTeleporter emulates a single 8 channel Pixelblaze output expander board.  To 
 Pixelblaze settings page and set the LED type to "Pixelblaze Output Expander".  A channel assignment list will
 display at the bottom of the page.  Scroll down to it and set up your LEDs.
 
-Set LED type to  WS2812, in RGB order. (APA102 in RGB order also works).  Note that each channel supports 256 LEDs.  If you want more, just add another 
-channel. PixelTeleporter supports a maximum of 2048 LEDs -- 8 channels of 256.  Be sure to press the Start Index "Auto" 
-button to set the starting index for each channel if you use more than one.
+Set LED type to  WS2812, in RGB order. (APA102 in RGB order also works).  pbxTeleporter does not impose a limit on the
+number of LEDs per channel, although the Pixelblaze Web UI may. If you run into the per-channel limit and need to add
+more LEDs, just add another channel. At this time pbxTeleporter and PixelTeleporter support a maximum of 4096 LEDs. 
 
-Once you're successfully set up and connected, pbxTeleporter window will display a "Connected" message,
+Once you've set your per-channel LED counts, be sure to press the Start Index "Auto" button to properly set the starting index
+for each channel.
+
+When you're successfully set up and connected, pbxTeleporter window will display a "Connected" message,
 along with the count of pixels it is currently receiving from the Pixelblaze.
 
 Configure your mapping function if needed, and set your pattern.

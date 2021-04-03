@@ -1,5 +1,21 @@
 # PixelTeleporter Change Log
 
+## Version 1.1.2 (2/21/2021) What's New
+Many Quality-of-life and UI improvements:
+- You can now translate (pan) objects by right-dragging with the mouse.
+- Object rotation with the mouse is generally smoother and more responsive.
+- Holding down the alt key allows you to rotate your object around the Z axis.
+- added setBackgroundImage() method to Pixelteleporter object. Supported image formats are: 
+ (.gif, .jpg, .tga, and .png).  (If you use setBackgroundImage, you can remove calls to background() from your sketches.)
+- Hold down the shift key while dragging to pan your background image
+- Hold down the shift key with the mouse wheel to zoom your background image
+- Connection status feedback!  When not receiving data from the pixelblaze, Pixelteleporter will now pulse between
+ slowly between black and grey.  Display will resume when the connection is reestablished
+- More connection status feedback! pbxTeleporter for Windows now displays connection status and LED count in its main window.
+
+Also includes various small fixes and improvements to servers. 
+The beta wiring label feature has been removed for now.
+
 ## Version 1.1.1 (10/21/2020) What's New
 Support for multiple Pixelblazes. (See new DualMatrix example)
 Added Fermat Spiral (Fibonacci256) example.

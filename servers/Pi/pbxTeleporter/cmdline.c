@@ -20,10 +20,10 @@
 #include "cmdline.h"
 
 // title and version
-const char *argp_program_version = "pbxTeleporter v1.1.0 for Linux/Pi";
+const char *argp_program_version = "pbxTeleporter v1.1.3 for Linux/Pi";
 
 // --help documentation
-static char doc[] = "\npbxTeleporter bridge v1.1.0\n"
+static char doc[] = "\npbxTeleporter bridge v1.1.3\n"
 		"Makes LED controller output available via UDP\n"
 		"This version works exclusively with the Pixelblaze controller.\n";
 
