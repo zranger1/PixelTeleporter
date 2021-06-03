@@ -1,5 +1,10 @@
 # PixelTeleporter Change Log
 
+## Version 1.1.3 (4/03/2021) What's New
+Minor update - increased the maximum supported number of LEDs to 4096 per PixelTeleporter object, and 
+updated all the servers (except the ESP8266 version) to match.   The ESP8266 version still supports up
+to 2048 pixels.
+
 ## Version 1.1.2 (2/21/2021) What's New
 Many Quality-of-life and UI improvements:
 - You can now translate (pan) objects by right-dragging with the mouse.

@@ -15,10 +15,8 @@ The server then forwards the pixel data across your LAN to the computer running 
 The Processing library make it simple to write sketches to receive the data and draw the pixels in 3D on your computer.
 With this toolset and the included  examples, you can quickly prototype almost any physical arrangement of LEDs.
 
-## Version 1.1.3 (4/03/2021) What's New
-Minor update - increased the maximum supported number of LEDs to 4096 per PixelTeleporter object, and 
-updated all the servers (except the ESP8266 version) to match.   The ESP8266 version still supports up
-to 2048 pixels.
+## Version 1.1.4 (7/03/2021) What's New
+Basic support for 3D printed and other geometric solids  Added ScreenShape and ScreenShapeFactory APIs so you can model objects with LEDs mounted behind translucent diffuser panels.  For the moment, supports just one LED per face.  See example code and javadocs for more details!
 
 ## Previously...
 Information on previous versions has been moved to CHANGELOG.md  in this repository.

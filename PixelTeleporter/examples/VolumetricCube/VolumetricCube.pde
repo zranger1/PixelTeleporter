@@ -1,6 +1,6 @@
 // Pixel Teleporter volumetric cube example
-// Works with either the walled cube mapping function in the PixelMap tab or
-// or the default Pixelblaze volumetric cube mapper.
+// Works with either the walled cube mapping function in the examples/MappingFunctions 
+// directory or the default Pixelblaze volumetric cube mapper.
 //
 // 8/26/2020 JEM (ZRanger1)
 import pixelTeleporter.library.*;

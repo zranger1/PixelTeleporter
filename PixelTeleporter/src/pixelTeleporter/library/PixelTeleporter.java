@@ -375,6 +375,28 @@ public class PixelTeleporter implements PConstants {
 	}	
 
 	/**
+	 * 	 	Creates ScreenShape object using supplied shape
+	 * 	 	<p>
+	 * @param s PShape to attach to ScreenShape object
+	 * @param opacity optional opacity for this object (0-255, default == 255)
+	 * @return new ScreenLED object
+	 */	
+	public ScreenShape ScreenShapeFactory(PShape s) {
+		return new ScreenShape(this,s,255);
+	}
+	
+	/**
+	 * 	 	Creates ScreenShape object using supplied shape
+	 * 	 	<p>
+	 * @param s PShape to attach to ScreenShape object
+	 * @param opacity optional opacity for this object (int 0-255, default == 255)
+	 * @return new ScreenLED object
+	 */	
+	public ScreenShape ScreenShapeFactory(PShape s, int opacity) {
+		return new ScreenShape(this,s,opacity);
+	}		
+		
+	/**
 	 * 	 	Creates ScreenLED object using x,y,z coords
 	 * 	 	<p>.
 	 *
@@ -382,11 +404,11 @@ public class PixelTeleporter implements PConstants {
 	 * @param y y coordinate in 3D worldspace
 	 * @param z z coordinate in 3D worldspace
 	 * @return new ScreenLED object
-	 */	
+	 */		
 	public ScreenLED ScreenLEDFactory(float x, float y, float z) {
 		return new ScreenLED(this,x,y,z);
 	}
-
+	
 	/**
 	 * Read a Pixelblaze compatible pixel map into a list of ScreenLED objects.
 	 * @param fileName Name of file to write 
@@ -495,7 +517,7 @@ public class PixelTeleporter implements PConstants {
 		}    
 		app.popMatrix();	
 	}
-
+	
 	/**
 	 * Draw an LED object using the 2D renderer and the current viewing
 	 * transform.  The 2D renderer draws LEDs as 2D circles.  It is 
@@ -511,6 +533,20 @@ public class PixelTeleporter implements PConstants {
 		}   
 		app.popMatrix();
 	}
+	
+	/**
+	 * Draw an LED object using the supplied list of preconstructed shapes
+	 * @param obj list of ScreenShapess representing an LED object or panel.
+	 */
+	public void renderShape(LinkedList <ScreenShape> obj) {
+		app.pushMatrix();
+		mover.applyObjectTransform();	
+
+		for (ScreenShape led : obj) {
+			led.draw3D();
+		}    
+		app.popMatrix();	
+	}	
 
 	public void pre() {
 		bg.showImage(); 

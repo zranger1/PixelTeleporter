@@ -3,7 +3,6 @@ package pixelTeleporter.library;
 import java.util.*;
 import processing.core.*;
 
-
 /**
     Manages communication with the PixelTeleporter server device
     and provides a framework for object rendering and basic user 
@@ -13,7 +12,7 @@ import processing.core.*;
 	call its start() method to begin listening for pixel data
 	on the network.
  */
-class BackgroundImage implements PConstants {
+public class BackgroundImage implements PConstants {
 	PApplet app;
 	PImage bgImageOriginal;   // full background image as read from file
 	PImage bgImageZoomed;     // portion of background image displayed on screen
