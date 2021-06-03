@@ -3,7 +3,7 @@
 // where the LED is mounted behind a diffuser and illuminates a whole
 // face.
 //
-// Works with the mapping function "pentagonal icosatetrahedron.js" in 
+// Works with the mapping function "pentagonal icositetrahedron.js" in 
 // the examples/MappingFunctions directory/
 //
 // 7/02/2021 JEM (ZRanger1)
@@ -86,7 +86,7 @@ int[][] faceArray =  {
 
 // Construct the faces, link each face to an LED and assemble them
 // into our polyhedron.
-LinkedList<ScreenLED> buildIcosatetrahedron(float scale) {
+LinkedList<ScreenLED> buildIcositetrahedron(float scale) {
   int face,i;
   PShape s;
   
@@ -123,7 +123,7 @@ void setup() {
   pt = new PixelTeleporter(this,"127.0.0.1");  
  
   // build solid
-  obj = buildIcosatetrahedron(400);
+  obj = buildIcositetrahedron(400);
   
   // add slow rotation to enhance depth.  Spacebar toggles
   // rotation on/off, mouse wheel zooms, 'r' resets to original orientation.

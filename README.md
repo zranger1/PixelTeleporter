@@ -16,7 +16,7 @@ The Processing library make it simple to write sketches to receive the data and 
 With this toolset and the included  examples, you can quickly prototype almost any physical arrangement of LEDs.
 
 ## Version 1.1.4 (7/03/2021) What's New
-Basic support for 3D printed and other geometric solids  Added ScreenShape and ScreenShapeFactory APIs so you can model objects with LEDs mounted behind translucent diffuser panels.  For the moment, supports just one LED per face.  See example code and javadocs for more details!
+Basic support for 3D printed and other geometric solids. Added ScreenShape and ScreenShapeFactory APIs so you can model objects with LEDs mounted behind translucent diffuser panels.  For the moment, supports just one LED per face.  See example code and javadocs for more details!
 
 ## Previously...
 Information on previous versions has been moved to CHANGELOG.md  in this repository.
