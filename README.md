@@ -15,8 +15,12 @@ The server then forwards the pixel data across your LAN to the computer running 
 The Processing library make it simple to write sketches to receive the data and draw the pixels in 3D on your computer.
 With this toolset and the included  examples, you can quickly prototype almost any physical arrangement of LEDs.
 
-## Version 1.1.4 (7/03/2021) What's New
-Basic support for 3D printed and other geometric solids. Added ScreenShape and ScreenShapeFactory APIs so you can model objects with LEDs mounted behind translucent diffuser panels.  For the moment, supports just one LED per face.  See example code and javadocs for more details!
+## Version 1.1.9995b (10/18/2021) What's New
+--- It's **ALMOST** the 1.2.0 release --
+
+This release is just to give an advance look at the new LED renderer. It simulates light spreading and camera saturation, and even at this stage looks much more like actual LEDs than before.  See the example 'LEDRenderTest'  for an early demonstration.  This will be fully implemted and documented in v1.2.0.  
+
+Easy install for Processing 4:  If you're using the Processing 4 beta, you can install by downloading the file PixelTeleporter.pdex from the 1.1.9995b release area, and double clicking it or dropping it on top of Processing.  When Processing asks if you'd like to install PixelTeleporter, say "YES!".   That's it.
 
 ## Previously...
 Information on previous versions has been moved to CHANGELOG.md  in this repository.

@@ -1,5 +1,8 @@
 # PixelTeleporter Change Log
 
+## Version 1.1.4 (7/03/2021) What's New
+Basic support for 3D printed and other geometric solids. Added ScreenShape and ScreenShapeFactory APIs so you can model objects with LEDs mounted behind translucent diffuser panels.  For the moment, supports just one LED per face.  See example code and javadocs for more details!
+
 ## Version 1.1.3 (4/03/2021) What's New
 Minor update - increased the maximum supported number of LEDs to 4096 per PixelTeleporter object, and 
 updated all the servers (except the ESP8266 version) to match.   The ESP8266 version still supports up

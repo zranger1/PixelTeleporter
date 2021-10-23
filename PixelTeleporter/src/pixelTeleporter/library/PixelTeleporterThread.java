@@ -4,6 +4,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.net.SocketOption;
+import java.net.SocketOptions;
+import java.net.StandardSocketOptions;
 import java.util.Arrays;
 
 import processing.core.*;
@@ -28,7 +31,7 @@ class PixelTeleporterThread extends Thread {
 	// Timeout value, in milliseconds, for "disconnected" indicator
 	final int DISCONNECT_TIMEOUT = 5000;
 
-	//command to fetch a frame from the microcontroller.  
+	//command to fetch a frame from the server  
 	final static byte CMD_REQUEST_FRAME = (byte) 0xF0; 	
 
 	PixelTeleporter parent;
@@ -37,9 +40,10 @@ class PixelTeleporterThread extends Thread {
 	int serverPort;
 	byte[] buffer;
 	byte[] sendbuf;
+	public int[] pixelBuffer;
 	DatagramPacket datagramIn;
 	DatagramPacket datagramOut;
-
+	
 	boolean running;   
 	int status;
 	int lastActivity;
@@ -50,7 +54,8 @@ class PixelTeleporterThread extends Thread {
 		this.clientPort = clientPort;
 		this.serverPort = serverPort;
 		buffer = new byte[bufsize];
-		sendbuf = new byte[128];  
+		pixelBuffer = new int[this.parent.MAX_PIXELS];  
+		sendbuf = new byte[128];  		
 		sendbuf[0] = CMD_REQUEST_FRAME;  
 		datagramIn = new DatagramPacket(buffer, buffer.length); 
 
@@ -59,12 +64,31 @@ class PixelTeleporterThread extends Thread {
 
 		status = UDP_NONE;
 		lastActivity = parent.app.millis();
+		
+		class doh implements SocketOption {
+
+			@Override
+			public String name() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Class type() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+		}
 
 		try {
+			boolean on = true;
 			ds = new DatagramSocket(null);
 			ds.setSoTimeout(0);
+			ds.setReuseAddress(true);
 			ds.bind(new InetSocketAddress(clientPort));
-		} catch (SocketException e) {
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -99,45 +123,56 @@ class PixelTeleporterThread extends Thread {
 	public boolean available() {
 		return (status == UDP_RECEIVED);    
 	}
-	
-	
+		
 	/**
 	 * Flash the entire pixel display light grey at a low frequency.
 	 * Used to signal that the server is disconnected.
 	 */	
-	int doDisconnectFlash(int [] buffer) {
+	int doDisconnectFlash() {
 	  float bri = ((parent.app.millis() - lastActivity) % 3000f) / 3000f;
 	  if (bri > 0.5) bri = 1-bri;
-	  Arrays.fill(buffer,(int) (128 * bri));
-	  return buffer.length / 3;				
+	  Arrays.fill(pixelBuffer,parent.app.color(128 * bri));
+	  return pixelBuffer.length;				
 	}
 
 	/** 
-	 * Copies pixel colors from the network buffer of bytes into PixelTeleporter's
-	 * internal integer pixel buffer, which work better with Processing. 
+	 * Copies pixel colors from the network buffer of bytes into the transport's
+	 * internal ARGB pixel buffer, which is way faster once we get back into
+	 * the Processing/OpenGL graphics API. 
 	 * Returns number of pixels copied.
 	 */
-	int readData(int [] buffer) {
+	int readData() {
 		byte [] data;
-		int i;
+		int i,pix,col;
 
 		if (available()) {
 			data = datagramIn.getData();
-			i = 0;
+			i = pix = 0;
 			while (i < datagramIn.getLength()) {
-				buffer[i] = Byte.toUnsignedInt(data[i++]);  //r
-				buffer[i] = Byte.toUnsignedInt(data[i++]);  //g
-				buffer[i] = Byte.toUnsignedInt(data[i++]);  //b             
+				// processing color order = 0xAARRGGBB
+				col = 0xFF000000;                           //a - defaults to opaque 
+				col |= Byte.toUnsignedInt(data[i++]) << 16; //r
+				col |= Byte.toUnsignedInt(data[i++]) << 8;  //g
+				col |= Byte.toUnsignedInt(data[i++]);       //b
+				pixelBuffer[pix++] = col;
 			}
 			status = UDP_NONE;  
 			return datagramIn.getLength() / 3;
 		}
 		else if (!isConnected()) {
-          return doDisconnectFlash(buffer);
+          return doDisconnectFlash();
 		}
 		
 		return 0;
-	}      
+	}     
+	
+	/**
+	 * Returns pointer to int array containing the last read set of pixels
+	 * in Processing's normal ARGB color format.
+	 */
+	public int[] getPixelBuffer() {
+		return pixelBuffer;
+	}
 
 	public void start() {
 		System.out.println("PixelTeleporter thread starting");  

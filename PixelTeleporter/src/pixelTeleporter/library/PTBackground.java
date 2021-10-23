@@ -12,7 +12,7 @@ import processing.core.*;
 	call its start() method to begin listening for pixel data
 	on the network.
  */
-public class BackgroundImage implements PConstants {
+public class PTBackground implements PConstants {
 	PApplet app;
 	PImage bgImageOriginal;   // full background image as read from file
 	PImage bgImageZoomed;     // portion of background image displayed on screen
@@ -23,7 +23,7 @@ public class BackgroundImage implements PConstants {
 	boolean needClip;
 	boolean needScale;
 	
-	public BackgroundImage(PApplet pApp) {
+	public PTBackground(PApplet pApp) {
 		this.app = pApp;
 		this.bgImageOriginal = null;  // original background image
 		this.bgImageZoomed = null;      // image at user zoom factor

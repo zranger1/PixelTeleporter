@@ -10,8 +10,8 @@ import pixelTeleporter.library.*;
 import java.util.*;
 
 // constants
-final int numRows=32; 
-final int numCols=64; 
+final int numRows=16; 
+final int numCols=16; 
 
 // global variables
 PixelTeleporter pt;
@@ -43,13 +43,13 @@ LinkedList<ScreenLED> buildMatrix(int dimX,int dimY) {
 }
 
 void setup() {
-  size(1000,500,P3D);     // Set up the stage 
+  size(768,768,P3D);     // Set up the stage 
   
   pt = new PixelTeleporter(this,"192.168.1.42");
   pt.setElementSize(22,95);
 
 // Optional - load single pass blur shader
-  blur = loadShader("blur.glsl");   
+  blur = loadShader("blur.glsl");
   
   panel = buildMatrix(numCols,numRows);
    
@@ -60,8 +60,8 @@ void draw() {
   background(30);
 
 // draw LED matrix
-  pt.render2D(panel);
+  pt.draw(panel);
 
 // Optional - Apply blur shader. 
-  filter(blur);          
+//  filter(blur);          
 }

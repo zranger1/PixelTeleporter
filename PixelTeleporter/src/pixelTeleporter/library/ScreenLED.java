@@ -39,51 +39,63 @@ public class ScreenLED {
 	}
 
 	public void setIndex(int n) {
-		index = 3 * n;    
+		index = n;    
 	}
 
 	public int getIndex() {
-		return index / 3;
+		return index;
 	}
 	
-	public void draw2D() {
-		int r,g,b,i;   
+	public void draw() {
+		int pix;   
 		
 		parent.app.pushMatrix();
 
 		parent.app.translate(x,y);
-		i = index;
-		r = parent.mover.pixelBuffer[i++];
-		g = parent.mover.pixelBuffer[i++];
-		b = parent.mover.pixelBuffer[i];
-		parent.app.fill(r,g,b);
+		pix = parent.pixelBuffer[index];
+		parent.app.fill(pix);
 		parent.app.circle(0,0,parent.ledSize);   
 			
 		parent.app.popMatrix();    
 	} 
 
 	public void draw3D() {
-		int r,g,b,i;
+		int pix;
 		float size,mag;
 		
 		parent.app.pushMatrix();    
 		parent.app.translate(x,y,z);
-
-		i = index;
-		r = parent.mover.pixelBuffer[i++];
-		g = parent.mover.pixelBuffer[i++];
-		b = parent.mover.pixelBuffer[i];
+		
+		// get pixel and set slightly transparent alpha
+		pix = parent.pixelBuffer[index];
 
 		//draw roughly larger sphere for roughly brighter pixel    
-		mag = (r > g) ? ((r > b) ? r : b) : ((g > b) ? g : b);
+		mag = parent.app.brightness(pix);
 		mag /= 255.0;
 		size = parent.ledSize + (parent.ledSize * mag);
 
-		parent.app.fill(r,g,b,176);
+		parent.app.fill(pix,176);
 		parent.app.sphere(size);
 		
 		parent.app.popMatrix();
 	}
+	
+	
+	public int getBrightness() {
+		return (int) parent.app.brightness(parent.pixelBuffer[index]);
+	}
+	
+	/**
+	 * Translates ScreenLED to center and returns an int containing
+	 * the pixel's current RGB color.  Calling program is responsible
+	 * for pushMatrix/popMatrix;
+	 * @return
+	 */
+	public int renderAssist() {	   
+		parent.app.translate(x,y,z);
+		return  parent.pixelBuffer[index];
+	}
+	
 }
 
 

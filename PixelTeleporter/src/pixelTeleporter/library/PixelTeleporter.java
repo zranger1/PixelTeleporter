@@ -45,17 +45,33 @@ import processing.event.MouseEvent;
 	call its start() method to begin listening for pixel data
 	on the network.
  */
+
+/*
+ TODO - keep linked list of initialized renderers in main object to make
+ switching faster in cases where initialization might be a little slow.
+ Make VERY certain that we're in colorMode(RGB,255,255,255) when rendering.
+ Can we save/restore the previous (user) colorMode??
+ 
+ JSON save/restore renderer!! (include frame rate/frame count in saved data so we can recover timing on playback.  Or
+ maybe timestamp of each frame so we can make the deltas the same.)
+ 
+ RenderType.USER renderer support??
+ 
+ */
+
 public class PixelTeleporter implements PConstants {
 	PApplet app;	
 	PixelTeleporterThread thread;
 	Mover mover;
-	BackgroundImage bg;
+	PTBackground bg;
 	int ledSize = 15;        
-	int pixelSize = 20;      
+	int pixelSize = 20;    
+	public int[] pixelBuffer;
 	boolean uiActive = false;
 	boolean autoDataActive = false;
 	boolean isController = false;
 	static boolean showPixelInfo = false;
+	LEDRenderer renderer = null;
 	private final ptEventListener ptEventListener = new ptEventListener();
 
 	// global pt object reference counter 
@@ -80,7 +96,9 @@ public class PixelTeleporter implements PConstants {
 		
 		mover = new Mover(this); 
 		thread = new PixelTeleporterThread(this,ipAddr,clientPort,serverPort,PIXEL_BUFFER_SIZE);
-		bg = new BackgroundImage(app);
+		pixelBuffer = thread.getPixelBuffer();
+		bg = new PTBackground(app);
+		renderer = new _renderDefault();
 		refCount++;
 
 		// register cleanup function
@@ -100,6 +118,7 @@ public class PixelTeleporter implements PConstants {
 			app.noStroke();              // no outlining
 			app.rectMode(CENTER);        // Rectangles are positioned based on their center.
 			app.ellipseMode(CENTER);     // Ellipses are positioned based on their center.  
+			app.imageMode(CENTER);       // Images at center too.
 			app.sphereDetail(8);         // reduce number of sphere vertices for performance
 
 			welcome();
@@ -238,29 +257,45 @@ public class PixelTeleporter implements PConstants {
 	}
 
 	/**
-	 *  Start data transport.
+	 *  Start data transport and initialize camera UI if enabled
 	 */
 	public void start() {
+		if (uiActive) mover.initializeCamera();
 		thread.start();
 	}
 
 	/**
-	  Copies pixel colors from the network buffer of bytes into PixelTeleporter's
-	  integer pixel buffer. 
+	  To be called in draw() prior to rendering. Asks the transport to copy any 
+	  pixel data it has recieved from the network to the internal ARGB pixel
+	  buffer, which we can use more easily for rendering. 
 	 * @return number of pixels copied
 	 */
 	public int readData() {
-		return thread.readData(mover.pixelBuffer);
+		return thread.readData();
 	}
 
 	/**
- 		Requests a frame of pixel data from the transport
- 		<p>
- 		Called by user from draw() when ready to render pixels.
+ 		Tells the transport to request a frame of pixel data from the
+ 		server. Called from draw() when ready to render pixels, although
+ 		pixels will not be available for drawing until after the transport has
+ 		received them from the network, and reformatted them into ARGB data
+ 		via the readData() method.
 	 */	
 	public void requestData() {
 		thread.requestData();
 	}  
+		
+	/**
+	 * Gets the color of a pixel
+	 * @param index - index of pixel to be retrieved
+	 * @return - ARGB color of pixel at specified index
+	 * @note NO PARAMETER VALIDATION HERE. It's supposed to be fast! So be careful
+	 * not to request pixels outside the valid range (0-4095) unless you just happen to like
+	 * being shut down by exceptions.
+	 */
+	public int getPixel(int index) {
+		return pixelBuffer[index];
+	}	
 
 	/**
 	 * Apply current viewing transform to all displayable objects.
@@ -501,57 +536,132 @@ public class PixelTeleporter implements PConstants {
 
 		return c;
 	}   
-
+	
 	/**
 	 * Draw an LED object using the 3D renderer and the current viewing
 	 * transform.  The 3D renderer uses a translucent sphere with diameter
-	 * dependent on brightness, to represent LEDs.
+	 * dependent on brightness, to represent LEDs. 
 	 * @param obj list of ScreenLEDs representing an LED object or panel.
 	 */
-	public void render3D(LinkedList <ScreenLED> obj) {
-		app.pushMatrix();
-		mover.applyObjectTransform();	
+	protected class _render3D implements LEDRenderer {
+		public void render(LinkedList <ScreenLED> obj) {
+			app.pushMatrix();
+			mover.applyObjectTransform();	
 
-		for (ScreenLED led : obj) {
-			led.draw3D();
-		}    
-		app.popMatrix();	
+			for (ScreenLED led : obj) {
+				led.draw3D();
+			}    
+			app.popMatrix();	
+		}
 	}
 	
 	/**
-	 * Draw an LED object using the 2D renderer and the current viewing
-	 * transform.  The 2D renderer draws LEDs as 2D circles.  It is 
-	 * somewhat faster than the 3D render and is well suited to flat panels.
-	 * @param obj list of ScreenLEDs representing an LED object or panel.
+	 * Draw an LED object using the default renderer and the current viewing
+	 * transform.<p>
+	 * How the object is drawn by the default renderer depends on the type of object.
+	 * A list of ScreenLED objects will be rendered as 2D circles. A list of 
+	 * ScreenShapes will be drawn as shapes in 3D space.
+     *
+	 * @param obj Linked list of ScreenLEDs or ScreenLED derived objects representing an
+	 * arrangement of LEDs.
 	 */	
+	protected class _renderDefault implements LEDRenderer {
+		public void render(LinkedList <ScreenLED> obj) {
+			app.pushMatrix();
+			mover.applyObjectTransform();
+
+			for (ScreenLED led : obj) {
+				led.draw();
+			}   
+			app.popMatrix();
+		}
+	}
+	
+	/**
+	 * Sets the method used to draw LED objects to the screen. Available methods are:
+	 * <p>
+	 * 
+	 * <li><strong>RenderMethod.DEFAULT</strong>  - renders ScreenObj lists in 2D and ScreenShape lists in 3D.  Fast and simple.</li>
+	 * <li><strong>RenderMethod.DRAW3D</strong>   - renders all objects in 3D space using Processing graphics API calls</li>
+	 * <li><strong>RenderMethod.REALISTIC2D</strong> - uses Processing API calls to render realistic video-quality LED objects.
+	 * Looks great, but performance will vary depending on your computer and GPU.</li> 
+	 * <li><strong>RenderMethod.FILE</strong> - records incoming LED data to a JSON file for later playback. Useful for making
+	 * movies and debugging.</li>
+     * <li><strong>RenderMethod.SHADER3D</strong> - NOT YET IMPLEMENTED - Does nothing at the moment. (Uses OpenGL and GLSL to
+     *  render highly detailed objects in 3D space. Performance may vary greatly depending on your GPU.) </li>
+	 */
+	public void setRenderMethod(RenderMethod m) {
+		switch (m) {
+		case DEFAULT:
+			renderer = new _renderDefault();
+			break;
+		case DRAW3D:
+			renderer = new _render3D();
+		case REALISTIC2D:
+			renderer = new RendererR2D(this);
+			break;
+		case SHADER3D:
+			renderer = new _renderDefault();
+			break;
+		}			
+	}
+	
+	/**
+	 * Draw an LED object using the selected renderer and the current viewing
+	 * transform.<p>
+   */ 	
+	public void draw(LinkedList <ScreenLED> obj) {
+		renderer.render(obj);
+	}
+
+	/**
+	 * @deprecated 
+	 * Use new draw() method instead.
+	 * @see #draw
+	 * @see #setRenderMethod
+	 */
 	public void render2D(LinkedList <ScreenLED> obj) {
+		renderer.render(obj);
+	}
+	
+	/**
+	 * @deprecated
+	 * Use new draw() method instead. 
+	 * @see #draw
+	 * @see #setRenderMethod
+	 */
+	public void render3D(LinkedList <ScreenLED> obj) {
 		app.pushMatrix();
 		mover.applyObjectTransform();
 
 		for (ScreenLED led : obj) {
-			led.draw2D();
+			led.draw3D();
+		}   
+		app.popMatrix();
+	}	
+	
+	/**
+	 * @deprecated
+	 * Use new draw() method instead 
+	 * @see #draw
+	 * @see #setRenderMethod
+	 */
+	public void renderShape(LinkedList <ScreenShape> obj) {
+		app.pushMatrix();
+		mover.applyObjectTransform();
+
+		for (ScreenShape led : obj) {
+			led.draw3D();
 		}   
 		app.popMatrix();
 	}
 	
-	/**
-	 * Draw an LED object using the supplied list of preconstructed shapes
-	 * @param obj list of ScreenShapess representing an LED object or panel.
-	 */
-	public void renderShape(LinkedList <ScreenShape> obj) {
-		app.pushMatrix();
-		mover.applyObjectTransform();	
-
-		for (ScreenShape led : obj) {
-			led.draw3D();
-		}    
-		app.popMatrix();	
-	}	
-
+	
+	
 	public void pre() {
 		bg.showImage(); 
 		readData();
-		if (isController) applyViewingTransform();
+		if (uiActive && isController) applyViewingTransform();
 	}
 
 	public void post() {
@@ -650,19 +760,21 @@ public class PixelTeleporter implements PConstants {
 					bg.moveRect(distX,distY);	
 				}
 				else if (e.getButton() == LEFT) {
-					// rotation based on distance from start of drag with small dead zone to make
-					// it easier to control.
-					//offsetX = MOUSE_MIN_MOVEMENT * Math.signum(distX);
-					//distX = (app.abs(distX) > MOUSE_MIN_MOVEMENT) ? (distX-offsetX)/(app.width) * TWO_PI : 0;
+					// small dead zone so you won't always accidentally rotate when
+					// you click the screen.
+					if ((app.abs(distX) < MOUSE_MIN_MOVEMENT) && 
+					     (app.abs(distY) < MOUSE_MIN_MOVEMENT)) {
+				      return;						
+					}					
+					
+					// rotation based on distance from start of drag 
 					distX = distX / app.width * TWO_PI;
 					distY = distY / app.height * TWO_PI;
-					
-					//offsetY = MOUSE_MIN_MOVEMENT * Math.signum(distY);
-					//distY = (app.abs(distY) > MOUSE_MIN_MOVEMENT) ? (distY-offsetY)/(app.height) * TWO_PI : 0;					
-					 				
+							
 					// holding down alt rotates around the z axis only
  					if (e.isAltDown()) {
- 						mover.mouseRotation.z += distY; 						 						
+ 						mover.mouseRotation.z += 
+ 								(app.abs(distX) > app.abs(distY)) ?  distX : distY; 						 						
  					}
  					// otherwise rotate around x and y
  					else {

@@ -10,7 +10,6 @@ import processing.opengl.PGraphics3D;
 */  
 class Mover implements PConstants{
 	PixelTeleporter parent;
-	int[] pixelBuffer;       // buffer for incoming network data
 
 	//camera position  
 	float DEFAULT_CAMERA_DISTANCE = 1000;
@@ -35,8 +34,6 @@ class Mover implements PConstants{
 	public Mover(PixelTeleporter parent) {
 		this.parent = parent;
 
-		pixelBuffer = new int[parent.PIXEL_BUFFER_SIZE];    
-
 		//camera    
 		origin = new PVector(parent.app.width / 2, parent.app.height / 2, -200);
 		eye = origin.copy();
@@ -49,8 +46,6 @@ class Mover implements PConstants{
 		mouseRotation = new PVector(0,0,0);
 		mouseTranslation = new PVector(0,0,0);
 		autoMove = true;
-
-		initializeCamera();
 
 		timer = parent.app.millis();
 	}  
