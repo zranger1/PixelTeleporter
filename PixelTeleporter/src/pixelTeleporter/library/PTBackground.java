@@ -12,7 +12,7 @@ import processing.core.*;
 	call its start() method to begin listening for pixel data
 	on the network.
  */
-public class PTBackground implements PConstants {
+public class PTBackground {
 	PApplet app;
 	PImage bgImageOriginal;   // full background image as read from file
 	PImage bgImageZoomed;     // portion of background image displayed on screen

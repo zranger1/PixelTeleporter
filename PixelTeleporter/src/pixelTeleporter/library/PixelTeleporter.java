@@ -227,8 +227,7 @@ public class PixelTeleporter implements PConstants {
 	public boolean autoDataEnabled() {
 		return autoDataActive;
 	}
-	
-	
+		
 	/**
 	 * Enable display of per pixel tooltips on mouse hover
 	 *
@@ -553,7 +552,13 @@ public class PixelTeleporter implements PConstants {
 			}    
 			app.popMatrix();	
 		}
+		
+	    // does nothing in the default 3D renderer
+		public void setControl(RenderControl ctl, float value) {
+			;
+		}					
 	}
+	
 	
 	/**
 	 * Draw an LED object using the default renderer and the current viewing
@@ -575,6 +580,15 @@ public class PixelTeleporter implements PConstants {
 			}   
 			app.popMatrix();
 		}
+		
+	    // does nothing in the default renderer
+		public void setControl(RenderControl ctl, float value) {
+			;
+		}		
+	}
+	
+	public void setRenderControl(RenderControl ctl, float value) {
+       renderer.setControl(ctl,value);
 	}
 	
 	/**
@@ -598,7 +612,8 @@ public class PixelTeleporter implements PConstants {
 		case DRAW3D:
 			renderer = new _render3D();
 		case REALISTIC2D:
-			renderer = new RendererR2D(this);
+			// measure world, then go HD2D			
+			renderer = new HDRenderFirstPass(this,2);  
 			break;
 		case SHADER3D:
 			renderer = new _renderDefault();

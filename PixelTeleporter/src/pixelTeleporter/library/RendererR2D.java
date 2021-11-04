@@ -13,126 +13,156 @@ import processing.core.*;
  */
 // TODO -- add parameter control interface
 public class RendererR2D implements LEDRenderer {
-	PixelTeleporter parent;
+	PixelTeleporter pt;
 	PApplet pApp;
-	PGraphics pgLightMap;
-	PGraphics pgLED;
-	
-	public RendererR2D(PixelTeleporter p) {
-		parent = p;
-		pApp = parent.app;
-		pgLightMap = buildLightMap(pApp.max(pApp.width,pApp.height) / 5);
-		pgLED = buildLEDModel(parent.pixelSize);		
+	float mapWidth;     // dimensions of offscreen surface
+	float mapHeight;
+	float mapCenterX;
+	float mapCenterY;
+	float lightMapSize;
+	float ledSize;
+
+	float exposure;     // use lighting to model camera sensor saturation
+	float falloff;      // how fast light from the LED attenuates
+
+	PGraphics pg;  // offscreen drawing surface
+	PGraphics lightMap;  // texture model of light falloff
+	PGraphics highlight; // texture model of specular highlights on LED
+
+	public RendererR2D(PixelTeleporter p,float xSize,float ySize) {
+		pt = p;
+		pApp = pt.app;
+
+		// create and configure offscreen surface for drawing
+		mapWidth = (float) (xSize * 1.1); mapHeight = (float) (ySize * 1.1);
+		mapCenterX = mapWidth / 2;  mapCenterY = mapHeight / 2;
+		exposure = 8;
+		falloff = (float) 3.25;
+
+		pg = pApp.createGraphics((int) mapWidth,(int) mapHeight,pApp.P3D);
+		pg.imageMode(pApp.CENTER);
+		pg.rectMode(pApp.CENTER);
+		pg.beginDraw();
+		pg.blendMode(pApp.ADD);
+		pg.shininess(1000);
+		pg.specular(pg.color(255));
+		pg.endDraw();
+
+		// create light map and highlight textures
+		ledSize = pt.pixelSize;
+		lightMapSize = ledSize * 5;
+		lightMap = buildLightMap((int) lightMapSize,falloff,(int) (0.55 * ledSize));
+		highlight = buildLightMap((int) ledSize / 2,3,0);;		
 	}
-	
-	
+
 	public void render(LinkedList <ScreenLED> obj) {
 		pApp.pushMatrix();
+		pg.beginDraw();
+		pg.translate(mapCenterX,mapCenterY,0);
 
-	    pApp.blendMode(pApp.ADD);
-	    pApp.shininess(100);
-	    pApp.specular(255);
-	    pApp.lightSpecular(77,77,77);
-	    pApp.directionalLight(255,255,255,0,0,-1);	    
-	
-		//parent.mover.applyObjectTransform();
+		pg.lightSpecular(exposure,exposure,exposure);
+		pg.directionalLight(exposure,exposure,exposure,0,0,-1);
+		pg.background(8); // really needs to be (0,0);
+
+		pt.mover.applyObjectTransform();
 		for (ScreenLED led : obj) {
-			pApp.pushMatrix();
-			int col = led.renderAssist();
-				
-			
-			pApp.emissive(led.getBrightness());
-		    pApp.blendMode(pApp.BLEND);
-		    pApp.image(pgLED,0,0); 
-		    pApp.blendMode(pApp.ADD);
-		    pApp.tint(col);
-		    pApp.image(pgLightMap,0,0);			
-			pApp.popMatrix();
-		}   
-		pApp.popMatrix();		
+			int col = pt.pixelBuffer[led.index];
+			int b = ScreenLED.getBrightness(col);
+
+			// make sure there's always a tiny amount of
+			// ambient white light around.
+			if (b < 10) {
+				col = pApp.color(10);
+				b = 10;
+			}		
+
+			// set up material properties and draw individual 
+			// LEDs, then lay the light map on top.
+			pg.emissive(col);    
+			pg.image(lightMap,led.x,led.y);      
+
+			// draw (white) highlights proportional to brightness
+			pg.emissive(b);
+			pg.image(highlight,led.x-4,led.y-4);  		    			
+		}   	
+		pg.endDraw();
+		pApp.image(pg.get(),0,0);
+		pApp.popMatrix();
 	}
-	
-	PGraphics buildLightMap(int mapSize) {
-		  PGraphics pg;
-		  int x,y;
-		  float dx,dy,center,dist,maxDist;
-		  float LEDSize = (float) 0.12; // size of the lit area of the LED
-		  float LEDCore = (float) (LEDSize * 0.5);
-		  
-		  center = mapSize / 2;
-		  maxDist = (float) Math.sqrt(2 * center * center);
-		  
-		  pg = pApp.createGraphics(mapSize,mapSize);
-		  
-		  pg.beginDraw();
 
-		  pg.noFill();
-		  pg.rectMode(pApp.CENTER);
-		  pg.blendMode(pApp.ADD);
+	PGraphics buildLightMap(int mapSize,float falloff,int coreSize) {
+		PGraphics pg;
+		int x,y;
+		float dx,dy,center,dist,maxDist;
+		float alpha;
 
-		  
-		  for (y = 0; y < mapSize; y++) {
-		    for (x = 0; x < mapSize; x++) {
+		center = mapSize / 2;
+		maxDist = (float) Math.sqrt(center * center + center * center); 
 
-		      dx = (float) x - center;
-		      dy = (float) y - center;
-		      dist = (float) (Math.sqrt(dx * dx + dy * dy) / maxDist);
-		      if (dist <= LEDCore) {
-		        dist = 255;
-		      }
-		      else if (dist <= LEDSize) {
-		        dist = 255 * (1-dist);
-		      } else {
-		        dist = (float) (255 * Math.pow(1-dist , 2.75));
-		      }
-		      pg.set(x,y,pApp.color(dist,dist,dist,dist));
-		    }
-		  }
+		pg = pApp.createGraphics(mapSize,mapSize,pApp.P3D);
+		pg.smooth(8);
 
-		  dist = (float) Math.floor(mapSize * LEDSize);
-		/*  
-		  pg.strokeWeight(2);
-		  pg.stroke(16,16,16);
-		  pg.square(center,center - 1,dist + 1);   
-		  
-		  pg.strokeWeight(1);  
-		  pg.stroke(52,52,52,128);
-		  pg.square(center,center,dist);
-		*/  
-		  
-		  pg.endDraw();
-		  return pg; 
-		}	
-	
-	// builds a sprite for the default "simple" 2D LED model
-	PGraphics buildLEDModel(int sz) {
-		  PGraphics pg;
-		  float center;
-		  float LEDCore = (float) (sz * 0.9);  
-		  center = sz / 2;
-		  
-		  pg = pApp.createGraphics(sz,sz);
-		  
-		  pg.beginDraw();
-		  pg.shininess(100);
+		pg.beginDraw();
+		pg.noStroke();
+		pg.noFill();
 
-		  pg.rectMode(pApp.CENTER);
-		  pg.blendMode(pApp.ADD);
+		for (y = 0; y < mapSize; y++) {
+			for (x = 0; x < mapSize; x++) {
 
-		  pg.strokeWeight(2);
-		  pg.fill(20);
-		  pg.stroke(20);
-		  pg.square(center,center - 1,sz-1);   
+				dx = (float) x - center;
+				dy = (float) y - center;
+				dist = (float) (1-(Math.sqrt(dx * dx + dy * dy) / maxDist));      
+				alpha = (float) (255 * Math.pow(dist,falloff));
+				dist = (float) (255 * Math.pow(dist, falloff));
+				pg.set(x,y,pApp.color(dist,dist,dist,alpha));
+			}		  
+		}
 
-		  pg.noFill();
-		  pg.strokeWeight(1);  
-		  pg.stroke(32,32,32);
-		//  pg.square(center,center,sz-2);  
-		  
-		  pg.circle(center,center,LEDCore);
-		  
-		  pg.endDraw();
-		  return pg; 
-		}	
+		if (coreSize > 0) {
+			float c = (float) (255 * Math.pow(coreSize,falloff) /2);
+			pg.stroke(pApp.color(c));
+			pg.fill(255);
+			pg.circle(center,center,coreSize);    
+		}
+		pg.endDraw();
+		return pg;
+	}
+
+	/**
+	 * Higher values admit more light to the model "camera", increasing
+	 * overall brightness and possibly oversaturating and blowing out
+	 * brightly lit areas.<p>
+	 * Some overexposure is common in LED videos. It gives a glowing halo effect 
+	 * around the lit LEDs.  Use with care though - a little goes a long way.
+	 * The exposure setting here has enough range to make completely washed 
+	 * out displays.<p> 
+	 * The default value for exposure is 8. A setting of 0 turns the effect off, and
+	 * settings between 20 and 32, depending on your LED pattern, produce a good
+	 * "overexposed" video look. 
+	 * @param x
+	 */
+	public void setExposure(int x) {
+		exposure = pApp.constrain(x,0,255);
+	}
+
+	// set control values for the high def renderer
+	public void setControl(RenderControl ctl, float value) {
+		switch(ctl) {
+		case RESET:
+			// TODO - (mostly) not yet implemented
+			setExposure(8);
+			falloff = (float) 3.25;
+			break;
+		case EXPOSURE:
+			setExposure((int) value);
+			break;
+		case FALLOFF:
+			// TODO - (mostly) not yet implemented
+			falloff = value;
+			break;
+		}
+	}	
+
+
 
 }

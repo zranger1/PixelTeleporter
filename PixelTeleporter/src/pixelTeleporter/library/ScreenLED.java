@@ -79,23 +79,59 @@ public class ScreenLED {
 		
 		parent.app.popMatrix();
 	}
-	
-	
+		
+	/**
+	 * Calculate very fast approximate brightness.  Not really
+	 * accurate, but very LED-ish, and Processing's native
+	 * brightness() method seems to work this way too. 
+	 * @return brightness (0-255) value of object's current color 
+	 */
 	public int getBrightness() {
-		return (int) parent.app.brightness(parent.pixelBuffer[index]);
+	  int col = parent.pixelBuffer[index];
+	  int r = (col >> 16) & 0xFF;
+	  int g = (col >> 8) & 0xFF;
+	  int b = col & 0xFF;
+      if (b > g) g = b;
+      return (r > g) ? r : g;
+	}	
+	
+	/**
+	 * Calculate very fast approximate brightness of specified color.
+	 * Not really accurate, but very LED-ish, and Processing's native
+	 * brightness() method seems to work this way too. 
+	 * @return brightness (0-255) value of object's current color 
+	 */	
+	public static int getBrightness(int col) {
+		  int r = (col >> 16) & 0xFF;
+		  int g = (col >> 8) & 0xFF;
+		  int b = col & 0xFF;
+	      if (b > g) g = b;
+	      return (r > g) ? r : g;				
 	}
 	
 	/**
-	 * Translates ScreenLED to center and returns an int containing
-	 * the pixel's current RGB color.  Calling program is responsible
-	 * for pushMatrix/popMatrix;
-	 * @return
+	 * Returns the current color of the object in packed
+	 * ARGB (int) format.
 	 */
-	public int renderAssist() {	   
-		parent.app.translate(x,y,z);
+	public int getColor() {	   
 		return  parent.pixelBuffer[index];
 	}
+
+	/**
+	 * Stores the object's current (x,y,z) coordinates in the supplied PVector
+	 */
+	public void getPosition(PVector v) {
+		v.set(x,y,z);
+	}	
 	
+	/**
+	 * Translates the coordinate frame so that
+	 * the origin is at the object's current location.
+	 * Caller is responsible for pushMatrix()/popMatrix().
+	 */
+	public void translateToOrigin() {
+		parent.app.translate(x,y,z);		
+	}
 }
 
 
