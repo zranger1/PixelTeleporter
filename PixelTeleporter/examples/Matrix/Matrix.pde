@@ -63,5 +63,5 @@ void draw() {
   pt.draw(panel);
 
 // Optional - Apply blur shader. 
-//  filter(blur);          
+  filter(blur);          
 }

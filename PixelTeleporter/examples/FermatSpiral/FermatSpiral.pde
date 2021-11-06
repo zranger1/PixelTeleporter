@@ -63,7 +63,7 @@ void draw() {
   background(15);
 
 // draw LED matrix
-  pt.render3D(panel);
+  pt.draw(panel);
 
 // Optional - Apply blur shader. 
   filter(blur);          

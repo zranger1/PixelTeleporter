@@ -93,6 +93,6 @@ void draw() {
   text("Pixelblaze2",label2.x+xOffset,label2.y - 50);
 
 // render LED output for each panel
-  pt1.render2D(panel1);
-  pt2.render2D(panel2);
+  pt1.draw(panel1);
+  pt2.draw(panel2);
 }

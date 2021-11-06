@@ -66,7 +66,7 @@ void draw() {
   background(30);
 
 // draw volumetric cube
-  pt.render3D(object);
+  pt.draw(object);
    
 // Optional - Apply blur shader
 // If you need extra performance, comment out or remove

@@ -56,7 +56,7 @@ void draw() {
     background(30);
 
 // draw LED ring    
-    pt.render3D(ring);
+    pt.draw(ring);
     
 // Optional - Apply blur shader
     filter(blur);           

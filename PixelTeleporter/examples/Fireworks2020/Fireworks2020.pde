@@ -81,7 +81,7 @@ void draw() {
   background(0);
 
 // draw fireworks display
-  pt.render3D(panel);
+  pt.draw(panel);
      
 // Optional - Apply blur shader
 // If you need extra performance, comment out or remove

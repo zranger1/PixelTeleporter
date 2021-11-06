@@ -65,22 +65,6 @@ class PixelTeleporterThread extends Thread {
 		status = UDP_NONE;
 		lastActivity = parent.app.millis();
 		
-		class doh implements SocketOption {
-
-			@Override
-			public String name() {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public Class type() {
-				// TODO Auto-generated method stub
-				return null;
-			}
-			
-		}
-
 		try {
 			boolean on = true;
 			ds = new DatagramSocket(null);

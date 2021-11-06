@@ -4,7 +4,6 @@
 package pixelTeleporter.library;
 
 import java.util.LinkedList;
-
 import processing.core.*;
 
 /**
@@ -39,18 +38,18 @@ public class RendererR2D implements LEDRenderer {
 		exposure = 8;
 		falloff = (float) 3.25;
 
-		pg = pApp.createGraphics((int) mapWidth,(int) mapHeight,pApp.P3D);
-		pg.imageMode(pApp.CENTER);
-		pg.rectMode(pApp.CENTER);
+		pg = pApp.createGraphics((int) mapWidth,(int) mapHeight,PConstants.P3D);
+		pg.imageMode(PConstants.CENTER);
+		pg.rectMode(PConstants.CENTER);
 		pg.beginDraw();
-		pg.blendMode(pApp.ADD);
+		pg.blendMode(PConstants.ADD);
 		pg.shininess(1000);
 		pg.specular(pg.color(255));
 		pg.endDraw();
 
 		// create light map and highlight textures
 		ledSize = pt.pixelSize;
-		lightMapSize = ledSize * 5;
+		lightMapSize = PApplet.max(mapWidth,mapHeight) / 6;  
 		lightMap = buildLightMap((int) lightMapSize,falloff,(int) (0.55 * ledSize));
 		highlight = buildLightMap((int) ledSize / 2,3,0);;		
 	}
@@ -99,7 +98,7 @@ public class RendererR2D implements LEDRenderer {
 		center = mapSize / 2;
 		maxDist = (float) Math.sqrt(center * center + center * center); 
 
-		pg = pApp.createGraphics(mapSize,mapSize,pApp.P3D);
+		pg = pApp.createGraphics(mapSize,mapSize,PConstants.P3D);
 		pg.smooth(8);
 
 		pg.beginDraw();
@@ -142,7 +141,7 @@ public class RendererR2D implements LEDRenderer {
 	 * @param x
 	 */
 	public void setExposure(int x) {
-		exposure = pApp.constrain(x,0,255);
+		exposure = PApplet.constrain(x,0,255);
 	}
 
 	// set control values for the high def renderer

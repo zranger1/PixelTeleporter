@@ -47,11 +47,7 @@ import processing.event.MouseEvent;
  */
 
 /*
- TODO - keep linked list of initialized renderers in main object to make
- switching faster in cases where initialization might be a little slow.
- Make VERY certain that we're in colorMode(RGB,255,255,255) when rendering.
- Can we save/restore the previous (user) colorMode??
- 
+
  JSON save/restore renderer!! (include frame rate/frame count in saved data so we can recover timing on playback.  Or
  maybe timestamp of each frame so we can make the deltas the same.)
  
@@ -98,7 +94,7 @@ public class PixelTeleporter implements PConstants {
 		thread = new PixelTeleporterThread(this,ipAddr,clientPort,serverPort,PIXEL_BUFFER_SIZE);
 		pixelBuffer = thread.getPixelBuffer();
 		bg = new PTBackground(app);
-		renderer = new _renderDefault();
+		setRenderMethod(RenderMethod.DEFAULT);
 		refCount++;
 
 		// register cleanup function
@@ -570,7 +566,7 @@ public class PixelTeleporter implements PConstants {
 	 * @param obj Linked list of ScreenLEDs or ScreenLED derived objects representing an
 	 * arrangement of LEDs.
 	 */	
-	protected class _renderDefault implements LEDRenderer {
+	protected class _render2D implements LEDRenderer {
 		public void render(LinkedList <ScreenLED> obj) {
 			app.pushMatrix();
 			mover.applyObjectTransform();
@@ -607,16 +603,19 @@ public class PixelTeleporter implements PConstants {
 	public void setRenderMethod(RenderMethod m) {
 		switch (m) {
 		case DEFAULT:
-			renderer = new _renderDefault();
+		case HD2D:
+		case HD3D:
+			// measure world, then select appropriate renderer			
+			renderer = new HDRenderFirstPass(this,m);  
+			break;
+		case DRAW2D:
+			renderer = new _render2D();
 			break;
 		case DRAW3D:
 			renderer = new _render3D();
-		case REALISTIC2D:
-			// measure world, then go HD2D			
-			renderer = new HDRenderFirstPass(this,2);  
 			break;
-		case SHADER3D:
-			renderer = new _renderDefault();
+		case USER:
+			renderer = new _render2D();
 			break;
 		}			
 	}
@@ -635,6 +634,7 @@ public class PixelTeleporter implements PConstants {
 	 * @see #draw
 	 * @see #setRenderMethod
 	 */
+	@Deprecated
 	public void render2D(LinkedList <ScreenLED> obj) {
 		renderer.render(obj);
 	}
@@ -645,6 +645,7 @@ public class PixelTeleporter implements PConstants {
 	 * @see #draw
 	 * @see #setRenderMethod
 	 */
+	@Deprecated
 	public void render3D(LinkedList <ScreenLED> obj) {
 		app.pushMatrix();
 		mover.applyObjectTransform();
@@ -661,6 +662,7 @@ public class PixelTeleporter implements PConstants {
 	 * @see #draw
 	 * @see #setRenderMethod
 	 */
+	@Deprecated
 	public void renderShape(LinkedList <ScreenShape> obj) {
 		app.pushMatrix();
 		mover.applyObjectTransform();
@@ -746,7 +748,7 @@ public class PixelTeleporter implements PConstants {
 					// if shift, zoom in/out on the background
 					float s = bg.getScale();
 					s = s - (0.05f * (float) (e.getCount()));
-					app.constrain(s,0.01f,1.5f);
+					PApplet.constrain(s,0.01f,1.5f);
 					bg.setScale(s);
 					bg.needScale = true;
 					bg.needClip = true;
@@ -777,8 +779,8 @@ public class PixelTeleporter implements PConstants {
 				else if (e.getButton() == LEFT) {
 					// small dead zone so you won't always accidentally rotate when
 					// you click the screen.
-					if ((app.abs(distX) < MOUSE_MIN_MOVEMENT) && 
-					     (app.abs(distY) < MOUSE_MIN_MOVEMENT)) {
+					if ((PApplet.abs(distX) < MOUSE_MIN_MOVEMENT) && 
+					     (PApplet.abs(distY) < MOUSE_MIN_MOVEMENT)) {
 				      return;						
 					}					
 					
@@ -789,7 +791,7 @@ public class PixelTeleporter implements PConstants {
 					// holding down alt rotates around the z axis only
  					if (e.isAltDown()) {
  						mover.mouseRotation.z += 
- 								(app.abs(distX) > app.abs(distY)) ?  distX : distY; 						 						
+ 								(PApplet.abs(distX) > PApplet.abs(distY)) ?  distX : distY; 						 						
  					}
  					// otherwise rotate around x and y
  					else {

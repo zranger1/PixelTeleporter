@@ -2,7 +2,7 @@
  * 
  */
 package pixelTeleporter.library;
-
+import processing.core.*;
 import java.util.LinkedList;
 
 /**
@@ -28,11 +28,11 @@ public class HDRenderFirstPass implements LEDRenderer {
 	
 	
 	PixelTeleporter pt;
-	int realRenderer;
+	RenderMethod realRenderer;
 	float xSize,ySize,zSize;
 	LinkedList<_RControl> commands;
 	
-	HDRenderFirstPass(PixelTeleporter p,int rr) {
+	HDRenderFirstPass(PixelTeleporter p,RenderMethod rr) {
 		pt = p;
 		realRenderer = rr;
 		xSize = ySize = zSize = 0;
@@ -43,21 +43,28 @@ public class HDRenderFirstPass implements LEDRenderer {
 		// TODO - create new renderer of appropriate type and
 		// set it as the active renderer in the PT object.
 		switch(realRenderer) {
-		case 2: // 2D HD renderer
+		case DEFAULT: // select normal 2D or 3D based on world depth
+			if (zSize == 0) {
+				pt.setRenderMethod(RenderMethod.DRAW2D);
+			}
+			else {
+				pt.setRenderMethod(RenderMethod.DRAW3D);				
+			}
+			break;
+		case HD2D: // 2D HD renderer
 			// create a new HD 2D renderer
 			System.out.println("World Size: "+xSize+" x "+ySize);
 			pt.renderer = new RendererR2D(pt,xSize,ySize);
 			break;
-		case 3: // 3D HD renderer
-			System.out.println("3D HDR renderer is not yet implemented.");
+		case HD3D: // 3D HD renderer
+			System.out.println("3D HD renderer is not yet implemented.");
 			System.out.println("default 3D renderer (DRAW3D) selected.");			
 			pt.setRenderMethod(RenderMethod.DRAW3D);				
 			break;			
 		default:
-			System.out.println("Invalid renderer requested from HDRenderFirstPass");
-			System.out.println("Only 2 (2D HDR) and 3 (3D HDR) are supported.");
-			System.out.println("default renderer selected.");						
-			pt.setRenderMethod(RenderMethod.DEFAULT);
+			System.out.println("Unsupported renderer requested from HDRenderFirstPass");
+			System.out.println("DRAW3D renderer selected.");						
+			pt.setRenderMethod(RenderMethod.DRAW3D);
 			break;
 		}		
 		
@@ -90,14 +97,14 @@ public class HDRenderFirstPass implements LEDRenderer {
 		// for each coordinate, and thus the world coord size of the displayed
 		// object.
 		if (obj.size() > 0) {
-		  xSize = pt.app.abs(xmax-xmin);
-		  ySize = pt.app.abs(ymax-ymin);
-		  zSize = pt.app.abs(zmax-zmin);
+		  xSize = PApplet.abs(xmax-xmin);
+		  ySize = PApplet.abs(ymax-ymin);
+		  zSize = PApplet.abs(zmax-zmin);
 		}
 		else {
 			System.out.println("HDRenderFirstPass invoked on empty display list.");
 			System.out.println("This is... not good... you'll need to fix it.");
-			realRenderer = -1;
+			realRenderer = RenderMethod.DRAW2D;
 		}
 		
 		// first pass done.  Switch renderers next time this is 

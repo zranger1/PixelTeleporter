@@ -56,8 +56,8 @@ public class PTBackground {
 		if (this.bgImageZoomed == null) return;
 		
 		if (this.needClip) {
-			this.x = app.constrain(this.x, -bgImageZoomed.width / 2, bgImageZoomed.width);
-			this.y = app.constrain(this.y, -bgImageZoomed.height / 2, bgImageZoomed.height);		
+			this.x = PApplet.constrain(this.x, -bgImageZoomed.width / 2, bgImageZoomed.width);
+			this.y = PApplet.constrain(this.y, -bgImageZoomed.height / 2, bgImageZoomed.height);		
 
 			// clip to our display area
 			this.bgImageFinal = this.bgImageZoomed.get((int) this.x,(int) this.y,app.width, app.height);			
@@ -74,7 +74,7 @@ public class PTBackground {
 		// make a copy of the current image at our new scale, preserving aspect ratio
 		if (this.needScale) {
 			this.bgImageZoomed = bgImageOriginal.copy();
-			this.bgImageZoomed.resize((int) ((float) this.bgImageOriginal.width * this.scale),(int) 0);	
+			this.bgImageZoomed.resize((int) ((float) this.bgImageOriginal.width * this.scale), 0);	
 			this.needScale = false;			
 		}
 		

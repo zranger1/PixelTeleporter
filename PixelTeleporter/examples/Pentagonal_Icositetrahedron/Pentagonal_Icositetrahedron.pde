@@ -139,5 +139,5 @@ void draw() {
 
   // draw our object, coloring faces with the most recently received
   // pixel data.
-  pt.render3D(obj);       
+  pt.draw(obj);       
 }

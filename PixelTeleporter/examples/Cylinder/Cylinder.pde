@@ -84,7 +84,7 @@ void draw() {
   background(30);
 
 // draw cylinder
-  pt.render3D(object);    
+  pt.draw(object);    
   
 // Optional - Apply blur shader
 // If you need extra performance, comment out or remove
