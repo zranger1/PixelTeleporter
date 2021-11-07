@@ -133,7 +133,6 @@ public class PixelTeleporter implements PConstants {
 	 * @param pApp Pointer to currently running PApplet
 	 * @param ipAddr IPv4 address of PixelTeleporter server device
 	 * @param clientPort Port number to listen on. Default: 8081
-	 * @param serverPort Command receiver port on server device to receive commands. Default: 8082  
 	 */
 	public PixelTeleporter(PApplet pApp,String ipAddr,int clientPort) {
 		this(pApp,ipAddr,clientPort,clientPort);
@@ -227,8 +226,6 @@ public class PixelTeleporter implements PConstants {
 
 	/**
 	 * Enable display of per pixel tooltips on mouse hover
-	 *
-	 * @return true if enabled, false if disabled
 	 */
 	public void enablePixelInfo() {
 		showPixelInfo = true;
@@ -236,8 +233,6 @@ public class PixelTeleporter implements PConstants {
 
 	/**
 	 * Disable display of per pixel tooltips on mouse hover
-	 *
-	 * @return true if enabled, false if disabled
 	 */
 	public void disablePixelInfo() {
 		showPixelInfo = false;
@@ -409,7 +404,6 @@ public class PixelTeleporter implements PConstants {
 	 * 	 	Creates ScreenShape object using supplied shape
 	 * 	 	<p>
 	 * @param s PShape to attach to ScreenShape object
-	 * @param opacity optional opacity for this object (0-255, default == 255)
 	 * @return new ScreenLED object
 	 */	
 	public ScreenShape ScreenShapeFactory(PShape s) {
@@ -533,57 +527,6 @@ public class PixelTeleporter implements PConstants {
 		return c;
 	}   
 
-	/**
-	 * Draw an LED object using the 3D renderer and the current viewing
-	 * transform.  The 3D renderer uses a translucent sphere with diameter
-	 * dependent on brightness, to represent LEDs. 
-	 * @param obj list of ScreenLEDs representing an LED object or panel.
-	 */
-	protected class _render3D implements LEDRenderer {
-		public void render(LinkedList <ScreenLED> obj) {
-			app.pushMatrix();
-			mover.applyObjectTransform();	
-
-			for (ScreenLED led : obj) {
-				led.draw3D();
-			}    
-			app.popMatrix();	
-		}
-
-		// does nothing in the default 3D renderer
-		public void setControl(RenderControl ctl, float value) {
-			;
-		}					
-	}
-
-
-	/**
-	 * Draw an LED object using the default renderer and the current viewing
-	 * transform.<p>
-	 * How the object is drawn by the default renderer depends on the type of object.
-	 * A list of ScreenLED objects will be rendered as 2D circles. A list of 
-	 * ScreenShapes will be drawn as shapes in 3D space.
-	 *
-	 * @param obj Linked list of ScreenLEDs or ScreenLED derived objects representing an
-	 * arrangement of LEDs.
-	 */	
-	protected class _render2D implements LEDRenderer {
-		public void render(LinkedList <ScreenLED> obj) {
-			app.pushMatrix();
-			mover.applyObjectTransform();
-
-			for (ScreenLED led : obj) {
-				led.draw();
-			}   
-			app.popMatrix();
-		}
-
-		// does nothing in the default renderer
-		public void setControl(RenderControl ctl, float value) {
-			;
-		}		
-	}
-
 	public void setRenderControl(RenderControl ctl, float value) {
 		renderer.setControl(ctl,value);
 	}
@@ -602,23 +545,12 @@ public class PixelTeleporter implements PConstants {
 	 *  render highly detailed objects in 3D space. Performance may vary greatly depending on your GPU.) </li>
 	 */
 	public void setRenderMethod(RenderMethod m) {
-		switch (m) {
-		case DEFAULT:
-		case HD2D:
-		case HD3D:
-			// measure world, then select appropriate renderer			
-			renderer = new HDRenderFirstPass(this,m);  
-			break;
-		case DRAW2D:
-			renderer = new _render2D();
-			break;
-		case DRAW3D:
-			renderer = new _render3D();
-			break;
-		case USER:
-			renderer = new _render2D();
-			break;
-		}			
+		LEDRenderer r = new HDRenderFirstPass(this,m);
+		if (renderer != null) {
+			r.copyControlsFrom(renderer);
+	
+		}
+		renderer = r;		
 	}
 
 	/**

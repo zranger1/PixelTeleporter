@@ -10,10 +10,8 @@ import processing.core.*;
  * Realistic 2D ScreenLED renderer. Works best w/square aspect ratio windows
  *
  */
-// TODO -- add parameter control interface
-public class RendererR2D implements LEDRenderer {
-	PixelTeleporter pt;
-	PApplet pApp;
+public class RendererR2D extends LEDRenderer {
+
 	float mapWidth;     // dimensions of offscreen surface
 	float mapHeight;
 	float mapCenterX;
@@ -21,24 +19,18 @@ public class RendererR2D implements LEDRenderer {
 	float lightMapSize;
 	float ledSize;
 
-	float exposure;      // use lighting to model camera sensor saturation
-	float falloff;       // how fast light from the LED attenuates
-	int bgColor;         // RGB color of the "PCB" background behind the LEDs
-	int bgAlpha;         // transparency of background
-	float hOffset;       // relative x/y position of specular highlight center
-
 	PGraphics pg;        // offscreen drawing surface
 	PGraphics lightMap;  // texture model of light falloff
 	PGraphics highlight; // texture model of specular highlights on LED
 
-	public RendererR2D(PixelTeleporter p,float xSize,float ySize) {
-		pt = p;
-		pApp = pt.app;
-
+	public RendererR2D(PixelTeleporter p) {
+		super(p);
+	}
+	
+	void initialize() {
 		// create and configure offscreen surface for drawing
-		mapWidth = (float) (xSize * 1.1); mapHeight = (float) (ySize * 1.1);
+		mapWidth = (float) (worldXSize * 1.1); mapHeight = (float) (worldYSize * 1.1);
 		mapCenterX = mapWidth / 2;  mapCenterY = mapHeight / 2;
-		resetControls();
 
 		pg = pApp.createGraphics((int) mapWidth,(int) mapHeight,PConstants.P3D);
 		pg.imageMode(PConstants.CENTER);
@@ -53,17 +45,9 @@ public class RendererR2D implements LEDRenderer {
 		ledSize = pt.pixelSize;
 		lightMapSize = PApplet.max(mapWidth,mapHeight) / 5;  
 		lightMap = buildLightMap((int) lightMapSize,falloff,(int) (0.55 * ledSize));
-		highlight = buildLightMap((int) ledSize / 2,2,0);;		
+		highlight = buildLightMap((int) ledSize / 2,2,0);;						
 	}
 	
-	void resetControls() {
-		exposure = 8;
-		falloff = (float) 2;
-		bgColor = pApp.color(8);
-		bgAlpha = 255;
-		hOffset = 3;
-	}
-
 	public void render(LinkedList <ScreenLED> obj) {
 		pApp.pushMatrix();
 		pg.beginDraw();
@@ -158,24 +142,15 @@ public class RendererR2D implements LEDRenderer {
 
 	// set control values for the high def renderer
 	public void setControl(RenderControl ctl, float value) {
+		super.setControl(ctl,value);
+		
 		switch(ctl) {
-		case RESET:
-            resetControls();
-			break;
-		case EXPOSURE:
-			setExposure((int) value);
-			break;
 		case FALLOFF:
-			// TODO - (mostly) not yet implemented. We'll need to
+			// TODO - mostly) not yet implemented. We'll need to
 			// regenerate, or at least rescale the light map for this
 			// to work properly.
-			falloff = value;
 			break;
-		case BGCOLOR:
-			bgColor = (int) value;
-			break;
-		case BGALPHA:
-			bgAlpha = (int) value;
+		default:
 			break;
 		}
 	}	

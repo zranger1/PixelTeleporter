@@ -15,64 +15,52 @@ import java.util.LinkedList;
  * the user.
  *
  */
-public class HDRenderFirstPass implements LEDRenderer {
-	class _RControl {
-		RenderControl cmd;
-		float value;
-		
-		_RControl(RenderControl c, float v) {
-			cmd = c;
-			value = v;
-		}
-	}
-	
-	
-	PixelTeleporter pt;
+public class HDRenderFirstPass extends LEDRenderer {
 	RenderMethod realRenderer;
-	float xSize,ySize,zSize;
-	LinkedList<_RControl> commands;
 	
 	HDRenderFirstPass(PixelTeleporter p,RenderMethod rr) {
-		pt = p;
+		super (p);
 		realRenderer = rr;
-		xSize = ySize = zSize = 0;
-		commands = new LinkedList<_RControl>();		
+		worldXSize = worldYSize = worldZSize = 0;
 	}
 	
+	void initialize() { ; }
+	
 	void switchToRealRenderer() {
-		// TODO - create new renderer of appropriate type and
-		// set it as the active renderer in the PT object.
+		// TODO - create new renderer of appropriate type,
+		// copy inheritable control settings and
+		// set the new renderer as active for the next frame.
 		switch(realRenderer) {
 		case DEFAULT: // select normal 2D or 3D based on world depth
-			if (zSize == 0) {
-				pt.setRenderMethod(RenderMethod.DRAW2D);
+			if (worldZSize == 0) {
+				pt.renderer = new Renderer2D(pt);				
 			}
 			else {
-				pt.setRenderMethod(RenderMethod.DRAW3D);				
+				pt.renderer = new Renderer3D(pt);				
 			}
 			break;
+		case DRAW2D:
+			pt.renderer = new Renderer2D(pt);
+			break;
+		case DRAW3D:
+			pt.renderer = new Renderer3D(pt);
+			break;
 		case HD2D: // 2D HD renderer
-			// create a new HD 2D renderer
-			System.out.println("World Size: "+xSize+" x "+ySize);
-			pt.renderer = new RendererR2D(pt,xSize,ySize);
+            pt.renderer = new RendererR2D(pt);
 			break;
 		case HD3D: // 3D HD renderer
 			System.out.println("3D HD renderer is not yet implemented.");
-			System.out.println("default 3D renderer (DRAW3D) selected.");			
-			pt.setRenderMethod(RenderMethod.DRAW3D);				
+			System.out.println("default 3D renderer (DRAW3D) selected.");
+			pt.renderer = new Renderer3D(pt);			
 			break;			
 		default:
 			System.out.println("Unsupported renderer requested from HDRenderFirstPass");
 			System.out.println("DRAW3D renderer selected.");						
-			pt.setRenderMethod(RenderMethod.DRAW3D);
+			pt.renderer = new Renderer2D(pt);
 			break;
-		}		
-		
-		// set any renderer parameters the user gave us at startup time.
-		for (_RControl r : commands) {
-			pt.renderer.setControl(r.cmd,r.value);
-			System.out.println("rcontrol sent"+r.cmd+" "+r.value);
-		}		
+		}	
+		pt.renderer.copyControlsFrom(this);
+		pt.renderer.initialize();
 	}
 	
 	public void render(LinkedList <ScreenLED> obj) {
@@ -98,9 +86,9 @@ public class HDRenderFirstPass implements LEDRenderer {
 		// for each coordinate, and thus the world coord size of the displayed
 		// object.
 		if (obj.size() > 0) {
-		  xSize = PApplet.abs(xmax-xmin);
-		  ySize = PApplet.abs(ymax-ymin);
-		  zSize = PApplet.abs(zmax-zmin);
+		  worldXSize = PApplet.abs(xmax-xmin);
+		  worldYSize = PApplet.abs(ymax-ymin);
+		  worldZSize = PApplet.abs(zmax-zmin);
 		}
 		else {
 			System.out.println("HDRenderFirstPass invoked on empty display list.");
@@ -110,14 +98,6 @@ public class HDRenderFirstPass implements LEDRenderer {
 		
 		// first pass done.  Switch renderers next time this is 
         switchToRealRenderer();
-	}
-	
-	// keep track of control commands the user sends at setup time so we can
-	// pass them on to the actual renderer when we start it.
-	public void setControl(RenderControl ctl, float value) {		
-		_RControl c = new _RControl(ctl,value);
-		commands.add(c);		
-	}
-	
+	}	
 
 }
