@@ -143,6 +143,13 @@ class PixelTeleporterThread extends Thread {
 			status = UDP_NONE;  
 			return datagramIn.getLength() / 3;
 		}
+		// if we're paused, just hold the last frame
+		else if (!parent.isRunning) {
+			lastActivity = parent.app.millis();
+			return datagramIn.getLength() / 3;			
+		}
+		// otherwise check to see if we've lost connection and 
+		// start the grey "disconnected" flash after a few seconds.
 		else if (!isConnected()) {
           return doDisconnectFlash();
 		}

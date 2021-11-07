@@ -71,6 +71,7 @@ public class HDRenderFirstPass implements LEDRenderer {
 		// set any renderer parameters the user gave us at startup time.
 		for (_RControl r : commands) {
 			pt.renderer.setControl(r.cmd,r.value);
+			System.out.println("rcontrol sent"+r.cmd+" "+r.value);
 		}		
 	}
 	

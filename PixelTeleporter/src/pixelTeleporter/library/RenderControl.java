@@ -15,4 +15,6 @@ public enum RenderControl {
 	RESET,
 	EXPOSURE,
 	FALLOFF,
+	BGCOLOR,
+	BGALPHA
 }

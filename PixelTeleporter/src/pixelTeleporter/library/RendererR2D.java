@@ -21,10 +21,13 @@ public class RendererR2D implements LEDRenderer {
 	float lightMapSize;
 	float ledSize;
 
-	float exposure;     // use lighting to model camera sensor saturation
-	float falloff;      // how fast light from the LED attenuates
+	float exposure;      // use lighting to model camera sensor saturation
+	float falloff;       // how fast light from the LED attenuates
+	int bgColor;         // RGB color of the "PCB" background behind the LEDs
+	int bgAlpha;         // transparency of background
+	float hOffset;       // relative x/y position of specular highlight center
 
-	PGraphics pg;  // offscreen drawing surface
+	PGraphics pg;        // offscreen drawing surface
 	PGraphics lightMap;  // texture model of light falloff
 	PGraphics highlight; // texture model of specular highlights on LED
 
@@ -35,8 +38,7 @@ public class RendererR2D implements LEDRenderer {
 		// create and configure offscreen surface for drawing
 		mapWidth = (float) (xSize * 1.1); mapHeight = (float) (ySize * 1.1);
 		mapCenterX = mapWidth / 2;  mapCenterY = mapHeight / 2;
-		exposure = 8;
-		falloff = (float) 3.25;
+		resetControls();
 
 		pg = pApp.createGraphics((int) mapWidth,(int) mapHeight,PConstants.P3D);
 		pg.imageMode(PConstants.CENTER);
@@ -49,9 +51,17 @@ public class RendererR2D implements LEDRenderer {
 
 		// create light map and highlight textures
 		ledSize = pt.pixelSize;
-		lightMapSize = PApplet.max(mapWidth,mapHeight) / 6;  
+		lightMapSize = PApplet.max(mapWidth,mapHeight) / 5;  
 		lightMap = buildLightMap((int) lightMapSize,falloff,(int) (0.55 * ledSize));
-		highlight = buildLightMap((int) ledSize / 2,3,0);;		
+		highlight = buildLightMap((int) ledSize / 2,2,0);;		
+	}
+	
+	void resetControls() {
+		exposure = 8;
+		falloff = (float) 2;
+		bgColor = pApp.color(8);
+		bgAlpha = 255;
+		hOffset = 3;
 	}
 
 	public void render(LinkedList <ScreenLED> obj) {
@@ -61,7 +71,7 @@ public class RendererR2D implements LEDRenderer {
 
 		pg.lightSpecular(exposure,exposure,exposure);
 		pg.directionalLight(exposure,exposure,exposure,0,0,-1);
-		pg.background(8); // really needs to be (0,0);
+		pg.background(bgColor,bgAlpha);
 
 		pt.mover.applyObjectTransform();
 		for (ScreenLED led : obj) {
@@ -82,7 +92,7 @@ public class RendererR2D implements LEDRenderer {
 
 			// draw (white) highlights proportional to brightness
 			pg.emissive(b);
-			pg.image(highlight,led.x-4,led.y-4);  		    			
+			pg.image(highlight,led.x-hOffset,led.y-hOffset);  		    			
 		}   	
 		pg.endDraw();
 		pApp.image(pg.get(),0,0);
@@ -104,6 +114,8 @@ public class RendererR2D implements LEDRenderer {
 		pg.beginDraw();
 		pg.noStroke();
 		pg.noFill();
+		pg.shininess(100);
+		pg.specular(pg.color(255));		
 
 		for (y = 0; y < mapSize; y++) {
 			for (x = 0; x < mapSize; x++) {
@@ -148,16 +160,22 @@ public class RendererR2D implements LEDRenderer {
 	public void setControl(RenderControl ctl, float value) {
 		switch(ctl) {
 		case RESET:
-			// TODO - (mostly) not yet implemented
-			setExposure(8);
-			falloff = (float) 3.25;
+            resetControls();
 			break;
 		case EXPOSURE:
 			setExposure((int) value);
 			break;
 		case FALLOFF:
-			// TODO - (mostly) not yet implemented
+			// TODO - (mostly) not yet implemented. We'll need to
+			// regenerate, or at least rescale the light map for this
+			// to work properly.
 			falloff = value;
+			break;
+		case BGCOLOR:
+			bgColor = (int) value;
+			break;
+		case BGALPHA:
+			bgAlpha = (int) value;
 			break;
 		}
 	}	

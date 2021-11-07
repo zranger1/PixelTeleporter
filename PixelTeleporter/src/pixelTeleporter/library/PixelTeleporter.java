@@ -50,9 +50,9 @@ import processing.event.MouseEvent;
 
  JSON save/restore renderer!! (include frame rate/frame count in saved data so we can recover timing on playback.  Or
  maybe timestamp of each frame so we can make the deltas the same.)
- 
+
  RenderType.USER renderer support??
- 
+
  */
 
 public class PixelTeleporter implements PConstants {
@@ -66,13 +66,14 @@ public class PixelTeleporter implements PConstants {
 	boolean uiActive = false;
 	boolean autoDataActive = false;
 	boolean isController = false;
+	boolean isRunning = true;
 	static boolean showPixelInfo = false;
 	LEDRenderer renderer = null;
 	private final ptEventListener ptEventListener = new ptEventListener();
 
 	// global pt object reference counter 
-    static int refCount = 0; 
-    
+	static int refCount = 0; 
+
 	//constants
 	public final static String VERSION = "##library.prettyVersion##";	
 	final int MAX_PIXELS = 4096;
@@ -86,10 +87,10 @@ public class PixelTeleporter implements PConstants {
 	 * @param ipAddr IPv4 address of PixelTeleporter server device
 	 * @param serverPort Command receiver port on server device. Default: 8081  
 	 * @param clientPort Port number to listen on. Default: 8082
- 	 */
+	 */
 	public PixelTeleporter(PApplet pApp,String ipAddr,int serverPort,int clientPort) {
 		this.app = pApp;	
-		
+
 		mover = new Mover(this); 
 		thread = new PixelTeleporterThread(this,ipAddr,clientPort,serverPort,PIXEL_BUFFER_SIZE);
 		pixelBuffer = thread.getPixelBuffer();
@@ -137,7 +138,7 @@ public class PixelTeleporter implements PConstants {
 	public PixelTeleporter(PApplet pApp,String ipAddr,int clientPort) {
 		this(pApp,ipAddr,clientPort,clientPort);
 	}
-	
+
 	/**
 	 * Creates and initializes a PixelTeleporter object using default server/client
 	 * UDP ports (8081,8082)
@@ -223,7 +224,7 @@ public class PixelTeleporter implements PConstants {
 	public boolean autoDataEnabled() {
 		return autoDataActive;
 	}
-		
+
 	/**
 	 * Enable display of per pixel tooltips on mouse hover
 	 *
@@ -232,7 +233,7 @@ public class PixelTeleporter implements PConstants {
 	public void enablePixelInfo() {
 		showPixelInfo = true;
 	}	
-	
+
 	/**
 	 * Disable display of per pixel tooltips on mouse hover
 	 *
@@ -241,7 +242,7 @@ public class PixelTeleporter implements PConstants {
 	public void disablePixelInfo() {
 		showPixelInfo = false;
 	}	
-	
+
 	/**
 	 * Returns state of PixelTeleporter's pixel index order labeling
 	 *
@@ -279,7 +280,7 @@ public class PixelTeleporter implements PConstants {
 	public void requestData() {
 		thread.requestData();
 	}  
-		
+
 	/**
 	 * Gets the color of a pixel
 	 * @param index - index of pixel to be retrieved
@@ -369,7 +370,7 @@ public class PixelTeleporter implements PConstants {
 	public void setBackgroundImage(String imgPath) {
 		bg.load(imgPath);
 	} 	
-	
+
 	/**
  		Called when the library shuts down.
  		<p>
@@ -414,7 +415,7 @@ public class PixelTeleporter implements PConstants {
 	public ScreenShape ScreenShapeFactory(PShape s) {
 		return new ScreenShape(this,s,255);
 	}
-	
+
 	/**
 	 * 	 	Creates ScreenShape object using supplied shape
 	 * 	 	<p>
@@ -425,7 +426,7 @@ public class PixelTeleporter implements PConstants {
 	public ScreenShape ScreenShapeFactory(PShape s, int opacity) {
 		return new ScreenShape(this,s,opacity);
 	}		
-		
+
 	/**
 	 * 	 	Creates ScreenLED object using x,y,z coords
 	 * 	 	<p>.
@@ -438,7 +439,7 @@ public class PixelTeleporter implements PConstants {
 	public ScreenLED ScreenLEDFactory(float x, float y, float z) {
 		return new ScreenLED(this,x,y,z);
 	}
-	
+
 	/**
 	 * Read a Pixelblaze compatible pixel map into a list of ScreenLED objects.
 	 * @param fileName Name of file to write 
@@ -531,7 +532,7 @@ public class PixelTeleporter implements PConstants {
 
 		return c;
 	}   
-	
+
 	/**
 	 * Draw an LED object using the 3D renderer and the current viewing
 	 * transform.  The 3D renderer uses a translucent sphere with diameter
@@ -548,21 +549,21 @@ public class PixelTeleporter implements PConstants {
 			}    
 			app.popMatrix();	
 		}
-		
-	    // does nothing in the default 3D renderer
+
+		// does nothing in the default 3D renderer
 		public void setControl(RenderControl ctl, float value) {
 			;
 		}					
 	}
-	
-	
+
+
 	/**
 	 * Draw an LED object using the default renderer and the current viewing
 	 * transform.<p>
 	 * How the object is drawn by the default renderer depends on the type of object.
 	 * A list of ScreenLED objects will be rendered as 2D circles. A list of 
 	 * ScreenShapes will be drawn as shapes in 3D space.
-     *
+	 *
 	 * @param obj Linked list of ScreenLEDs or ScreenLED derived objects representing an
 	 * arrangement of LEDs.
 	 */	
@@ -576,17 +577,17 @@ public class PixelTeleporter implements PConstants {
 			}   
 			app.popMatrix();
 		}
-		
-	    // does nothing in the default renderer
+
+		// does nothing in the default renderer
 		public void setControl(RenderControl ctl, float value) {
 			;
 		}		
 	}
-	
+
 	public void setRenderControl(RenderControl ctl, float value) {
-       renderer.setControl(ctl,value);
+		renderer.setControl(ctl,value);
 	}
-	
+
 	/**
 	 * Sets the method used to draw LED objects to the screen. Available methods are:
 	 * <p>
@@ -597,8 +598,8 @@ public class PixelTeleporter implements PConstants {
 	 * Looks great, but performance will vary depending on your computer and GPU.</li> 
 	 * <li><strong>RenderMethod.FILE</strong> - records incoming LED data to a JSON file for later playback. Useful for making
 	 * movies and debugging.</li>
-     * <li><strong>RenderMethod.SHADER3D</strong> - NOT YET IMPLEMENTED - Does nothing at the moment. (Uses OpenGL and GLSL to
-     *  render highly detailed objects in 3D space. Performance may vary greatly depending on your GPU.) </li>
+	 * <li><strong>RenderMethod.SHADER3D</strong> - NOT YET IMPLEMENTED - Does nothing at the moment. (Uses OpenGL and GLSL to
+	 *  render highly detailed objects in 3D space. Performance may vary greatly depending on your GPU.) </li>
 	 */
 	public void setRenderMethod(RenderMethod m) {
 		switch (m) {
@@ -619,11 +620,11 @@ public class PixelTeleporter implements PConstants {
 			break;
 		}			
 	}
-	
+
 	/**
 	 * Draw an LED object using the selected renderer and the current viewing
 	 * transform.<p>
-   */ 	
+	 */ 	
 	public void draw(LinkedList <ScreenLED> obj) {
 		renderer.render(obj);
 	}
@@ -638,7 +639,7 @@ public class PixelTeleporter implements PConstants {
 	public void render2D(LinkedList <ScreenLED> obj) {
 		renderer.render(obj);
 	}
-	
+
 	/**
 	 * @deprecated
 	 * Use new draw() method instead. 
@@ -655,7 +656,7 @@ public class PixelTeleporter implements PConstants {
 		}   
 		app.popMatrix();
 	}	
-	
+
 	/**
 	 * @deprecated
 	 * Use new draw() method instead 
@@ -672,9 +673,9 @@ public class PixelTeleporter implements PConstants {
 		}   
 		app.popMatrix();
 	}
-	
-	
-	
+
+
+
 	public void pre() {
 		bg.showImage(); 
 		readData();
@@ -682,7 +683,7 @@ public class PixelTeleporter implements PConstants {
 	}
 
 	public void post() {
-		requestData();	
+		if (isRunning) requestData();	
 	}
 
 	/**
@@ -714,18 +715,38 @@ public class PixelTeleporter implements PConstants {
 					mover.mouseRotation.set(0,0,0);
 					mover.mouseTranslation.set(0,0,0);
 					mover.initializeCamera();
-				    break;
+					break;
 				case 'R':
 					bg.resetBackground();
 					break;
-				case 't':  // enable/disable tooltips on pixels
-					if (pixelInfoEnabled()) {
-						disablePixelInfo();
+				case TAB:
+					// pause/unpause data, hold current frame if paused
+					isRunning = !isRunning;
+					
+					// enable per-pixel tooltips only when paused.
+					if (isRunning) {
+						disablePixelInfo();						
 					}
 					else {
 						enablePixelInfo();
 					}
 					break;
+				case '0':
+					setRenderControl(RenderControl.EXPOSURE,0);
+					break;
+				case '1':
+					setRenderControl(RenderControl.EXPOSURE,8);
+					break;
+				case '2':
+					setRenderControl(RenderControl.EXPOSURE,16);
+					break;
+				case '3':
+					setRenderControl(RenderControl.EXPOSURE,24);
+					break;
+				case '4':
+					setRenderControl(RenderControl.EXPOSURE,32);
+					break;  					
+
 				default:
 					break;
 				} 			
@@ -762,16 +783,16 @@ public class PixelTeleporter implements PConstants {
 				mover.dragOriginX = x;
 				mover.dragOriginY = y;
 				break;
-				
+
 			case MouseEvent.RELEASE:
 				break;
-				
+
 			case MouseEvent.DRAG:
 				distX = x - mover.dragOriginX;
 				distY = y - mover.dragOriginY;
 				mover.dragOriginX = x; 
 				mover.dragOriginY = y;	
-				
+
 				if (e.isShiftDown())  {
 					// if shift drag w/either key, move the background
 					bg.moveRect(distX,distY);	
@@ -780,24 +801,24 @@ public class PixelTeleporter implements PConstants {
 					// small dead zone so you won't always accidentally rotate when
 					// you click the screen.
 					if ((PApplet.abs(distX) < MOUSE_MIN_MOVEMENT) && 
-					     (PApplet.abs(distY) < MOUSE_MIN_MOVEMENT)) {
-				      return;						
+							(PApplet.abs(distY) < MOUSE_MIN_MOVEMENT)) {
+						return;						
 					}					
-					
+
 					// rotation based on distance from start of drag 
 					distX = distX / app.width * TWO_PI;
 					distY = distY / app.height * TWO_PI;
-							
+
 					// holding down alt rotates around the z axis only
- 					if (e.isAltDown()) {
- 						mover.mouseRotation.z += 
- 								(PApplet.abs(distX) > PApplet.abs(distY)) ?  distX : distY; 						 						
- 					}
- 					// otherwise rotate around x and y
- 					else {
- 	 					mover.mouseRotation.x += distX;
- 						mover.mouseRotation.y += distY;
- 					}
+					if (e.isAltDown()) {
+						mover.mouseRotation.z += 
+								(PApplet.abs(distX) > PApplet.abs(distY)) ?  distX : distY; 						 						
+					}
+					// otherwise rotate around x and y
+					else {
+						mover.mouseRotation.x += distX;
+						mover.mouseRotation.y += distY;
+					}
 				}
 				else if (e.getButton() == RIGHT) {
 					// scale translation so we move a little faster as the camera moves away.

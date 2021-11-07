@@ -87,12 +87,7 @@ public class ScreenLED {
 	 * @return brightness (0-255) value of object's current color 
 	 */
 	public int getBrightness() {
-	  int col = parent.pixelBuffer[index];
-	  int r = (col >> 16) & 0xFF;
-	  int g = (col >> 8) & 0xFF;
-	  int b = col & 0xFF;
-      if (b > g) g = b;
-      return (r > g) ? r : g;
+	  return getBrightness(parent.pixelBuffer[index]);
 	}	
 	
 	/**
