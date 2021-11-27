@@ -100,8 +100,27 @@ public class ScreenLED {
 		  int r = (col >> 16) & 0xFF;
 		  int g = (col >> 8) & 0xFF;
 		  int b = col & 0xFF;
+		  
+		  //dimmer, but more accurate method
+		  //return (r+r+r+b+g+g+g) / 6;		  
+		  
 	      if (b > g) g = b;
 	      return (r > g) ? r : g;				
+	}
+	
+	public static int maxColor(int col) {
+		  int r = (col >> 16) & 0xFF;
+		  int g = (col >> 8) & 0xFF;
+		  int b = col & 0xFF;
+
+		  // find brightest color and calculate multiplier to 
+		  // get it to full brightness
+	      float m = (b > g) ? b : g;
+	      m = (float) 255.0 / ((m > r) ? m : r);
+	      // scale all color channels upward
+	      r *= m; g *= m; b *= m;
+	      
+		  return 0xFF000000 | b | (g << 8) | (r << 16);
 	}
 	
 	/**

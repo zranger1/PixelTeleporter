@@ -15,11 +15,12 @@ void setup() {
   size(1000,1000,P3D);     // Set up the stage 
   
   pt = new PixelTeleporter(this,"192.168.1.42");  
-  //pt.setElementSize(18);   // set display "led" size
+  pt.setElementSize(22,90);   // set display "led" size
   pt.setRenderMethod(RenderMethod.HD2D);
-  pt.setRenderControl(RenderControl.FALLOFF,6);
+  pt.setRenderControl(RenderControl.LEDMODEL_SMD,0);  
+  pt.setRenderControl(RenderControl.FALLOFF,5.5);
   pt.setRenderControl(RenderControl.BGALPHA,0);
-  //pt.setRenderControl(RenderControl.LEDMODEL_SQUARE,0);
+
   
 // Optional - load and configure two pass blur shader  
 //  shade = loadShader("blur.glsl");  
@@ -34,7 +35,7 @@ void setup() {
 // add slow rotation to enhance depth.  Spacebar toggles
 // rotation on/off, mouse wheel zooms, 'r' resets to original orientation.
 //  pt.setRotation(radians(-20),0,0);
-  pt.setRotationRate(0,0, -PI/4000);
+//  pt.setRotationRate(0,0, -PI/4000);
  
 // start listening on network thread   
   pt.start();
@@ -43,10 +44,12 @@ void setup() {
 PVector sz = new PVector();
 void draw() {
  
-  background(color(32,24,24));
+  background(color(48,40,40));
   noStroke();
-  fill(0);
-  circle(0,0,width * 0.333);
+  blendMode(REPLACE);
+  fill(0,255);
+  circle(0,0,width * 0.275);
+  blendMode(ADD);
   
   pt.draw(object);
 

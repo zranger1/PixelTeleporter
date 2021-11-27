@@ -16,5 +16,7 @@ public enum RenderControl {
 	EXPOSURE,
 	FALLOFF,
 	BGCOLOR,
-	BGALPHA
+	BGALPHA,
+    LEDMODEL_BULB,
+    LEDMODEL_SMD
 }

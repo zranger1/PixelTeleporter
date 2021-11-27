@@ -1,7 +1,6 @@
 package pixelTeleporter.library;
 import java.util.LinkedList;
-
-import processing.core.PApplet;
+import processing.core.*;
 
 // generic rendering interface.  Takes a list of ScreenLED objects
 // to be rendered.
@@ -22,7 +21,7 @@ public class LEDRenderer {
 	float falloff;       // how fast light from the LED attenuates across the scene
 	int bgColor;         // RGB color of the "PCB" background behind the LEDs
 	int bgAlpha;         // transparency of background
-	float hOffset;       // relative x/y position of specular highlight center	
+	LEDType model;      // LED light map appearance model. 
 	
 	LEDRenderer(PixelTeleporter pt) {
 		this.pt = pt;
@@ -38,7 +37,7 @@ public class LEDRenderer {
 		falloff = (float) 2;
 		bgColor = 8;
 		bgAlpha = 255;
-		hOffset = 3;
+		model = LEDType.BULB;
 	}
 	
 	void copyControlsFrom(LEDRenderer r) {
@@ -50,7 +49,7 @@ public class LEDRenderer {
 		falloff  = r.falloff;
 		bgColor  = r.bgColor;
 		bgAlpha  = r.bgAlpha;
-		hOffset  = r.hOffset;			
+        model =    r.model;		
 	}
 	
 	// set control values for the high def renderer
@@ -71,7 +70,17 @@ public class LEDRenderer {
 		case BGALPHA:
 			bgAlpha = (int) value;
 			break;
+		case LEDMODEL_BULB:			
+			model = LEDType.BULB;		
+			break;
+		case LEDMODEL_SMD:	
+			model = LEDType.SMD;
+			break;
 		}
+	}
+	
+	void getWorldSize(PVector s) {
+		s.set(worldXSize,worldYSize,worldZSize);
 	}
 	
 	// do nothing

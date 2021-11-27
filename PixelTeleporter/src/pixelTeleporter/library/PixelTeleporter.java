@@ -47,12 +47,13 @@ import processing.event.MouseEvent;
  */
 
 /*
-
+ TODO LIST
  JSON save/restore renderer!! (include frame rate/frame count in saved data so we can recover timing on playback.  Or
  maybe timestamp of each frame so we can make the deltas the same.)
 
  RenderType.USER renderer support??
-
+ 
+ Recieve from multiple transport types - PT Classic, PT Broadcast, Artnet, etc..
  */
 
 public class PixelTeleporter implements PConstants {
@@ -68,6 +69,8 @@ public class PixelTeleporter implements PConstants {
 	boolean isController = false;
 	boolean isRunning = true;
 	static boolean showPixelInfo = false;
+	TooltipHandler toolTip;
+	
 	LEDRenderer renderer = null;
 	private final ptEventListener ptEventListener = new ptEventListener();
 
@@ -95,6 +98,7 @@ public class PixelTeleporter implements PConstants {
 		thread = new PixelTeleporterThread(this,ipAddr,clientPort,serverPort,PIXEL_BUFFER_SIZE);
 		pixelBuffer = thread.getPixelBuffer();
 		bg = new PTBackground(app);
+		toolTip = new TooltipHandler();
 		setRenderMethod(RenderMethod.DEFAULT);
 		refCount++;
 
@@ -442,9 +446,10 @@ public class PixelTeleporter implements PConstants {
 	 * null if unable to read the specified file.
 	 */
 	public LinkedList<ScreenLED> importPixelblazeMap(String fileName,float scale) {
-		LinkedList<ScreenLED> object = new LinkedList<ScreenLED>();
+		LinkedList<ScreenLED> obj = new LinkedList<ScreenLED>();
 		JSONArray json = app.loadJSONArray(fileName);
 
+		// read the map
 		for (int i = 0; i < json.size(); i++) {
 			float x,y,z;
 
@@ -457,10 +462,17 @@ public class PixelTeleporter implements PConstants {
 
 			ScreenLED led = new ScreenLED(this,scale * x,scale * y,scale * z);
 			led.setIndex(i);
-			object.add(led);
+			obj.add(led);
 		}
-
-		return object;
+		
+		// adjust to center the object at (0,0,0) in world space
+		PVector center = findObjectCenter(obj);
+		for (ScreenLED p : obj) {
+			p.x -= center.x;
+			p.y -= center.y;
+			p.z -= center.z;			
+		}
+		return obj;
 	}
 
 	/**
@@ -605,9 +617,7 @@ public class PixelTeleporter implements PConstants {
 		}   
 		app.popMatrix();
 	}
-
-
-
+	
 	public void pre() {
 		bg.showImage(); 
 		readData();
@@ -762,6 +772,9 @@ public class PixelTeleporter implements PConstants {
 			case MouseEvent.CLICK:
 				break;
 			case MouseEvent.MOVE:
+				if (pixelInfoEnabled()) {
+					; // TODO - display per-pixel tooltip
+				}
 				break;
 			}				
 		}
