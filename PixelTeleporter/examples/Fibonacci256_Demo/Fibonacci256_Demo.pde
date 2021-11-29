@@ -15,21 +15,15 @@ void setup() {
   size(1000,1000,P3D);     // Set up the stage 
   
   pt = new PixelTeleporter(this,"192.168.1.42");  
-  pt.setElementSize(22,90);   // set display "led" size
+  pt.setElementSize(40,100);   // set display "led" size
   pt.setRenderMethod(RenderMethod.HD2D);
   pt.setRenderControl(RenderControl.LEDMODEL_SMD,0);  
-  pt.setRenderControl(RenderControl.FALLOFF,5.5);
+  pt.setRenderControl(RenderControl.FALLOFF,2);
   pt.setRenderControl(RenderControl.BGALPHA,0);
-
-  
-// Optional - load and configure two pass blur shader  
-//  shade = loadShader("blur.glsl");  
-//  shade.set("blurSize",4);
-//  shade.set("sigma",5.0f);
 
 // read JSON pixel map from file
   object = 
-     pt.importPixelblazeMap("data/fibonacci256.json",1);
+     pt.importPixelblazeMap("data/fibonacci256.json",3);
     
   
 // add slow rotation to enhance depth.  Spacebar toggles
@@ -48,16 +42,8 @@ void draw() {
   noStroke();
   blendMode(REPLACE);
   fill(0,255);
-  circle(0,0,width * 0.275);
+  circle(0,0,width * 0.825);
   blendMode(ADD);
   
   pt.draw(object);
-
-// Optional - Apply blur shader
-// If you need extra performance, comment out or remove
-// calls to shade.set and filter().    
-//  shade.set("horizontalPass",0);
-//  filter(shade);
-//  shade.set("horizontalPass",1);  
-//  filter(shade);   
 }

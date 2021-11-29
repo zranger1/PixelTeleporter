@@ -108,6 +108,28 @@ public class ScreenLED {
 	      return (r > g) ? r : g;				
 	}
 	
+	/**
+	 * sets rgb color to the specified brightness level
+	 * @param col - packed 24-bit ARGB color
+	 * @param bri - brightness level (0 to 1)
+	 * @return
+	 */
+	public static int setBrightness(int col,float bri) {
+		  int r = (col >> 16) & 0xFF;
+		  int g = (col >> 8) & 0xFF;
+		  int b = col & 0xFF;
+
+		  // find brightest color and calculate multiplier to 
+		  // get it to full brightness, then multiply that by the
+		  // specified brightness to get our output leve.
+	      float m = (b > g) ? b : g;
+	      m = bri * (float) 255.0 / ((m > r) ? m : r);
+	      // scale all color channels to the new level 
+	      r *= m; g *= m; b *= m;
+	      
+		  return 0xFF000000 | b | (g << 8) | (r << 16);
+	}	
+	
 	public static int maxColor(int col) {
 		  int r = (col >> 16) & 0xFF;
 		  int g = (col >> 8) & 0xFF;

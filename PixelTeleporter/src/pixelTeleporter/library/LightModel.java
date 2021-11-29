@@ -15,20 +15,20 @@ class LightModel {
 	LEDType type;
 
 	// just the basics for setup.  
-	LightModel(PApplet pApp,PGraphics pg, PGraphics lm, float scale,LEDType type) {
+	LightModel(PApplet pApp,PGraphics pg, PGraphics lm, float scale, float lightLevel,LEDType type) {
 		this.pApp = pApp;
 		this.pg = pg;
 		this.lightMap = lm;
 		this.type = type;
-		lightLevel = 64;
+		this.lightLevel = 42;//lightLevel;
+		
+		diode = buildLightMap(scale,2);   		
 
 		switch (type) {
 		case BULB:
-			diode = buildLightMap(scale/2,(float) 2);      
 			led = buildBulbModel(scale,lightLevel);      
 			break;
-		case SMD:
-			diode = buildLightMap(scale,2);      
+		case SMD:     
 			led = buildSMDModel(scale,lightLevel);      
 			break;     
 		}
@@ -37,7 +37,6 @@ class LightModel {
 	void draw(int col) {
 		float bri;
 		int hCol;
-		pg.pushMatrix();    
 
 		bri = (float) ((float) ScreenLED.getBrightness(col) / 255.0);
 		if (bri < 0.005) {
@@ -45,13 +44,11 @@ class LightModel {
 			hCol = pApp.color(0);
 		}
 		else {
-			bri = pApp.max((float) 0.4,bri);
-			float h = pApp.hue(col);
-			float s = pApp.saturation(col);
-			pApp.colorMode(PConstants.HSB,255);
-			hCol = pApp.color(h,s,255 * bri);
-			pApp.colorMode(PConstants.RGB,255);
+			// calculate bright diode center color
+			bri = PApplet.max((float) 0.4,bri);			
+			hCol = ScreenLED.setBrightness(col,bri);
 			
+			// display diffuse light map
 			pg.emissive(col);
 			pg.tint(col);
 			pg.image(lightMap,0,0); 			
@@ -61,109 +58,118 @@ class LightModel {
 		pg.emissive(col);
 		pg.image(led,0,0);
 
-
-
-		pg.emissive(col);
+		pg.emissive(hCol);
 		pg.tint(hCol);
-		pg.image(diode,0,0,diode.width * 2,diode.height * 2);
-
-		pg.popMatrix();    
+		pg.image(diode,0,0); //,diode.width * 2,diode.height * 2);
 	} 
 
 	PGraphics buildBulbModel(float mapSize,float lit) {
 		PGraphics pg;
+		PShape base;
+		
+	    base = pApp.createShape(PConstants.ELLIPSE,0,0,mapSize,mapSize);
+	    base.setFill(pApp.color((int) (lit*0.8)));
+	    base.translate(0,0,-(mapSize / 6));
+	    base.disableStyle();
 
 		pg = pApp.createGraphics((int) mapSize,(int) mapSize,PConstants.P3D);
 		pg.smooth(8);
+	    
+	    pg.beginDraw();
+	    pg.translate(mapSize / 2, mapSize / 2,0);
+	    pg.background(0,0,0,0);        
+	    pg.noStroke();
+	    pg.ellipseMode(PConstants.CENTER);
 
-		pg.beginDraw();
-		pg.noStroke();
-		float diam = mapSize * (float) 0.9;
-		pg.fill(pApp.color(lit));
-		pg.sphereDetail(60);
-
-		pg.background(0,0,0,0);
-		pg.translate(mapSize / 2, mapSize / 2,-200);
-
-		pg.shininess(35);
-
-		pg.ambient(0);
-		pg.lightSpecular(255, 255, 255);
-		pg.directionalLight(lit, lit, lit, (float)2.25, 2, -1);  
-		pg.specular(100);
-		pg.emissive(lit);
-		pg.pushMatrix();
-		pg.translate(0,0,-88);
-		pg.circle(0,0,diam);
-		pg.popMatrix();
-		pg.sphere(diam/2);
-
+	    pg.fill(lit);
+	    pg.sphereDetail(60);
+	    
+	    pg.shininess(50);
+	    pg.emissive(pApp.color(lit/2));
+	    pg.ambient(0,0,0);
+	    pg.lightSpecular(255, 255, 255);    
+	    pg.directionalLight(lit, lit, lit, (float) 2.25, 2, -1);    
+	    pg.specular(100);
+	    
+	    pg.shape(base);
+	    pg.sphere((float) (mapSize * 0.3125));
+	        
 		pg.endDraw();
 		return pg;    
 	}  
 
 	PGraphics buildSMDModel(float mapSize,float lit) {
 		PGraphics pg;
+	    float s,v;
+	    float scaledStroke = (float) (0.015625 * mapSize);  // 1/64 of the map size		
 
 		pg = pApp.createGraphics((int) mapSize,(int) mapSize,PConstants.P3D);
 
-		pg.beginDraw();    
-		pg.background(0,0,0,0);
-		pg.imageMode(PConstants.CENTER);
-		pg.ellipseMode(PConstants.CENTER);
-		pg.rectMode(PConstants.CENTER);    
-		pg.translate(mapSize / 2, mapSize / 2);    
+	    pg.beginDraw();    
+	    pg.background(0,0,0,0);
+	    pg.imageMode(PConstants.CENTER);
+	    pg.ellipseMode(PConstants.CENTER);
+	    pg.rectMode(PConstants.CENTER);    
+	    pg.translate(mapSize / 2, mapSize / 2);  
+	            
+	    s = (float) (mapSize * 0.775);
+	    
+	    // draw square SMD frame
+	    pg.noStroke();
+	    pg.fill(pApp.color((int) (lit * 0.6)));    
+	    pg.square(0,0,s);
+	    
+	    // 3D highlighting on top and left edges
+	    pg.stroke(pApp.color(lit));
+	    pg.strokeWeight(scaledStroke);
+	    v = s / 2;
+	    pg.line(-v,-v,v,-v);
+	    pg.line(-v,v,-v,-v);
+	   
+	    s *= 0.875;
 
-		float s = mapSize / 2;
-		pg.noStroke();
-		pg.fill(pApp.color(lit * (float) 0.6));    
-		pg.square(0,0,s);
-
-		pg.stroke(pApp.color(lit));
-		pg.strokeWeight(4);
-		float v = s / 2;
-		pg.line(-v,-v,v,-v);
-		pg.line(-v,v,-v,-v);
-
-		s *= 0.875;
-		pg.shininess(100);
-		pg.fill(pApp.color(lit * (float) 0.75));
-		pg.strokeWeight(3);
-		pg.stroke(pApp.color(lit));
-		pg.ellipse(0,0,s,s * (float) 0.9);
-
-		pg.noFill();
-		pg.strokeWeight(3);
-		pg.stroke(pApp.color(lit * (float) 0.25));
-		pg.ellipse(0,0,(s-4),(s-4) * (float)0.9);       
-
-
-		s /= 2;   
-		s *= 0.8;      
-		int cDark = pApp.color(lit * (float) 0.25);
-		int cLight = pApp.color(lit * (float) 0.8);
-		pg.strokeWeight(5);
-		pg.stroke(cDark);
-		pg.line(1,0,1,-s);
-		pg.stroke(cLight);
-		pg.line(0,0,0,-s);
-
-		s *= 0.717;   
-		pg.stroke(cDark);    
-		pg.line(2,0,-s+2,s);    
-		pg.stroke(cLight);    
-		pg.line(0,0,-s,s);
-
-		pg.stroke(cDark); 
-		pg.line(2,0,s+2,s);
-		pg.stroke(cLight);    
-		pg.line(0,0,s,s);
-
-		pg.noStroke();
-		pg.fill(pApp.color(lit));
-		pg.square(0,0,20);
-
-		pg.endDraw();
+	    // elliptical area at center of SMD
+	    pg.shininess(100);
+	    pg.fill(pApp.color((int) ((int) lit * 0.75)));
+	    pg.strokeWeight(scaledStroke);
+	    pg.stroke(pApp.color(lit));
+	    pg.ellipse(0,0,s,(float) (s * 0.9));
+	    
+	    pg.noFill();
+	    pg.strokeWeight(scaledStroke);
+	    pg.stroke(pApp.color((int) (lit * 0.25)));
+	    v = (float) (s - scaledStroke * 0.9);    
+	    pg.ellipse(0,0,v,(float) (v * 0.9));       
+	    
+	    // fake wiring!
+	    s /= 2;   
+	    s *= 0.8;      
+	    float cDark = (float) (lit * 0.25);
+	    float cLight = (float) (lit * 0.8);
+	    pg.strokeWeight(scaledStroke);
+	    pg.stroke(pApp.color(cDark));
+	    pg.line(scaledStroke/(float) 2.25,(float) 0,scaledStroke/(float) 2.25,-s);
+	    pg.stroke(pApp.color(cLight));
+	    pg.line(0,0,0,-s);
+	    
+	    s *= 0.725;  
+	    v = s + scaledStroke / 2;
+	    pg.stroke(pApp.color(cDark));    
+	    pg.line(-scaledStroke / 2,0,-v,s);    
+	    pg.stroke(pApp.color(cLight));    
+	    pg.line(0,0,-s,s);
+	    
+	    pg.stroke(pApp.color(cDark)); 
+	    pg.line(scaledStroke / 2,0,v,s);
+	    pg.stroke(pApp.color(cLight));    
+	    pg.line(0,0,s,s);
+	    
+	    pg.noStroke();
+	    pg.fill(pApp.color(lit));
+	    pg.emissive(pApp.color(lit));
+	    pg.circle(0,0,scaledStroke * 5);
+	        
+	    pg.endDraw();
 		return pg; 
 	} 
 
@@ -203,7 +209,7 @@ class LightModel {
 				dx = (float) (x+xst) - cx;
 				dy = (float) (y+yst) - cy;
 				dist = (float) Math.sqrt(dx * dx + dy * dy);
-				dist = (float) Math.max(0,1-(dist/maxDist));
+				dist = PApplet.max(0,1-(dist/maxDist));
 				alpha = (float) (255 * Math.pow(dist,falloff));
 				dist = (float) (255 * Math.pow(dist,falloff));
 				pg.set(x+xst,y+yst,pApp.color(dist,dist,dist,alpha));
