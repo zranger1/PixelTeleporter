@@ -673,21 +673,6 @@ public class PixelTeleporter implements PConstants {
 						enablePixelInfo();
 					}
 					break;
-				case '0':
-					setRenderControl(RenderControl.EXPOSURE,0);
-					break;
-				case '1':
-					setRenderControl(RenderControl.EXPOSURE,8);
-					break;
-				case '2':
-					setRenderControl(RenderControl.EXPOSURE,16);
-					break;
-				case '3':
-					setRenderControl(RenderControl.EXPOSURE,24);
-					break;
-				case '4':
-					setRenderControl(RenderControl.EXPOSURE,32);
-					break;  					
 
 				default:
 					break;

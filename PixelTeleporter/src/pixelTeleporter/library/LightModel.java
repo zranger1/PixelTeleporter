@@ -20,15 +20,15 @@ class LightModel {
 		this.pg = pg;
 		this.lightMap = lm;
 		this.type = type;
-		this.lightLevel = 42;//lightLevel;
+		this.lightLevel = lightLevel;
 		
-		diode = buildLightMap(scale,2);   		
-
 		switch (type) {
 		case BULB:
+			diode = buildLightMap(scale,2);   					
 			led = buildBulbModel(scale,lightLevel);      
 			break;
 		case SMD:     
+			diode = buildLightMap(scale,(float) 1.5);   					
 			led = buildSMDModel(scale,lightLevel);      
 			break;     
 		}
@@ -37,15 +37,15 @@ class LightModel {
 	void draw(int col) {
 		float bri;
 		int hCol;
-
+		
 		bri = (float) ((float) ScreenLED.getBrightness(col) / 255.0);
 		if (bri < 0.005) {
-			col = pApp.color(10);
+			col = pApp.color(8);
 			hCol = pApp.color(0);
 		}
 		else {
 			// calculate bright diode center color
-			bri = PApplet.max((float) 0.4,bri);			
+			bri = PApplet.max((float) 0.02,bri);			
 			hCol = ScreenLED.setBrightness(col,bri);
 			
 			// display diffuse light map
@@ -53,20 +53,21 @@ class LightModel {
 			pg.tint(col);
 			pg.image(lightMap,0,0); 			
 		}
-
+		
 		pg.noTint();  
 		pg.emissive(col);
-		pg.image(led,0,0);
-
+		pg.image(led,0,0);		
+		
 		pg.emissive(hCol);
 		pg.tint(hCol);
-		pg.image(diode,0,0); //,diode.width * 2,diode.height * 2);
+		pg.image(diode,0,0);		
+
 	} 
 
 	PGraphics buildBulbModel(float mapSize,float lit) {
 		PGraphics pg;
 		PShape base;
-		
+			
 	    base = pApp.createShape(PConstants.ELLIPSE,0,0,mapSize,mapSize);
 	    base.setFill(pApp.color((int) (lit*0.8)));
 	    base.translate(0,0,-(mapSize / 6));
@@ -81,15 +82,15 @@ class LightModel {
 	    pg.noStroke();
 	    pg.ellipseMode(PConstants.CENTER);
 
-	    pg.fill(lit);
+	    pg.fill(pApp.color(lit));
 	    pg.sphereDetail(60);
 	    
-	    pg.shininess(50);
-	    pg.emissive(pApp.color(lit/2));
-	    pg.ambient(0,0,0);
-	    pg.lightSpecular(255, 255, 255);    
+	    pg.shininess(60);
+	    pg.emissive(pApp.color(lit));
+	    pg.lightSpecular(255, 255, 255);   
+	    pg.ambientLight(lit/2,lit/2,lit/2);
 	    pg.directionalLight(lit, lit, lit, (float) 2.25, 2, -1);    
-	    pg.specular(100);
+	    pg.specular(255,255,255);
 	    
 	    pg.shape(base);
 	    pg.sphere((float) (mapSize * 0.3125));
@@ -103,15 +104,24 @@ class LightModel {
 	    float s,v;
 	    float scaledStroke = (float) (0.015625 * mapSize);  // 1/64 of the map size		
 
+	    lit = 64;
+	    
 		pg = pApp.createGraphics((int) mapSize,(int) mapSize,PConstants.P3D);
 
 	    pg.beginDraw();    
 	    pg.background(0,0,0,0);
+
 	    pg.imageMode(PConstants.CENTER);
 	    pg.ellipseMode(PConstants.CENTER);
 	    pg.rectMode(PConstants.CENTER);    
 	    pg.translate(mapSize / 2, mapSize / 2);  
-	            
+	    
+	    pg.shininess(150);
+	    pg.emissive(pApp.color(lit));
+	    pg.specular(100);		    
+	    pg.ambientLight(lit,lit,lit);    
+	    pg.lightSpecular(255, 255, 255);    
+    	            
 	    s = (float) (mapSize * 0.775);
 	    
 	    // draw square SMD frame
@@ -133,13 +143,13 @@ class LightModel {
 	    pg.fill(pApp.color((int) ((int) lit * 0.75)));
 	    pg.strokeWeight(scaledStroke);
 	    pg.stroke(pApp.color(lit));
-	    pg.ellipse(0,0,s,(float) (s * 0.9));
+	    pg.ellipse(0,0,s,(float) (s * 0.925));
 	    
 	    pg.noFill();
 	    pg.strokeWeight(scaledStroke);
 	    pg.stroke(pApp.color((int) (lit * 0.25)));
 	    v = (float) (s - scaledStroke * 0.9);    
-	    pg.ellipse(0,0,v,(float) (v * 0.9));       
+	    pg.ellipse(0,0,v,(float) (v * 0.925));       
 	    
 	    // fake wiring!
 	    s /= 2;   
@@ -183,6 +193,7 @@ class LightModel {
 		pg.beginDraw();
 		pg.imageMode(PConstants.CENTER);
 		pg.shininess(100);
+		pg.emissive(pApp.color(255));
 		pg.specular(pApp.color(255));    
 
 		setFalloffModel(pg,0,0,mapSize,falloff);
@@ -199,7 +210,7 @@ class LightModel {
 		float alpha;
 
 		dx = mapSize / 2;
-		maxDist = (float) Math.sqrt(dx * dx + dx * dx);
+		maxDist = (float) dx; //Math.sqrt(dx * dx + dx * dx);
 		cx = xst + dx;
 		cy = yst + dx;
 
@@ -211,8 +222,8 @@ class LightModel {
 				dist = (float) Math.sqrt(dx * dx + dy * dy);
 				dist = PApplet.max(0,1-(dist/maxDist));
 				alpha = (float) (255 * Math.pow(dist,falloff));
-				dist = (float) (255 * Math.pow(dist,falloff));
-				pg.set(x+xst,y+yst,pApp.color(dist,dist,dist,alpha));
+				//dist = (float) (255 * Math.pow(dist,falloff));
+				pg.set(x+xst,y+yst,pApp.color(255,alpha));
 			}      
 		}      
 	}  	

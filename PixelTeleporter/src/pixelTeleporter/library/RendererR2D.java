@@ -44,15 +44,14 @@ public class RendererR2D extends LEDRenderer {
 		pg.blendMode(PConstants.ADD);
 		pg.shininess(1000);
 		pg.specular(pg.color(255));
-        pg.ambient(pApp.color(exposure));		
+        pg.ambient(255,255,255);  		
 		pg.noStroke();
 		pg.endDraw();
 
 		// create light map and highlight textures
-			
 		lightMapSize = pt.pixelSize * 4;  
 		lightMap = buildLightMap(lightMapSize,falloff,model);
-		ledModel = new LightModel(pApp,pg,lightMap,ledSize,exposure,model);
+		ledModel = new LightModel(pApp,pg,lightMap,ledSize,ambient_light,model);
 	}
 	
 	public void render(LinkedList <ScreenLED> obj) {
@@ -61,13 +60,11 @@ public class RendererR2D extends LEDRenderer {
 		pg.blendMode(PConstants.ADD);				
 		pg.translate(mapCenterX,mapCenterY,0);
 
-		// background isn't affected by lighting...
 		pg.background(bgColor, bgAlpha);
-		pg.lightSpecular(exposure,exposure,exposure);
-		pg.directionalLight(exposure,exposure,exposure,0,0,-1);
-        pg.ambient(pApp.color(exposure));
-
-
+        pg.ambientLight(ambient_light,ambient_light,ambient_light);
+		pg.lightSpecular(ambient_light,ambient_light,ambient_light);
+		pg.ambient(255,255,255);		
+		
 		pt.mover.applyObjectTransform();
 		for (ScreenLED led : obj) {
 			pg.pushMatrix();			
@@ -107,11 +104,12 @@ public class RendererR2D extends LEDRenderer {
 	void setFalloffModel(PGraphics pg,int xst, int yst, float mapSize,float falloff) {
 		int x,y;
 		float cx,cy,dx,dy,dist,maxDist;
-		float alpha;
+		float alpha,brightness;
 
 		maxDist = (mapSize / 2);
 		cx = xst + maxDist;
 		cy = yst + maxDist;
+		brightness = 255 * indirectIntensity;
  			
 		for (y = 0; y < mapSize; y++) {
 			for (x = 0; x < mapSize; x++) {
@@ -120,27 +118,28 @@ public class RendererR2D extends LEDRenderer {
 				dist = (float) Math.sqrt(dx * dx + dy * dy);
 				dist = PApplet.max(0,1-(dist/maxDist));
 				alpha = (float) (255 * Math.pow(dist,falloff));
-				dist = (float) (255 * Math.pow(dist, falloff));
-				pg.set(x+xst,y+yst,pApp.color(dist,dist,dist,alpha));
+				//dist = (float) (255 * Math.pow(dist, falloff));
+				pg.set(x+xst,y+yst,pApp.color(brightness,alpha));
 			}		  
 		}			
 	}
 	
 	/**
-	 * Higher values admit more light to the model "camera", increasing
+	 * Controls the amount of light admitted to the model "camera", increasing
 	 * overall brightness and possibly oversaturating and blowing out
 	 * brightly lit areas.<p>
 	 * Some overexposure is common in LED videos. It gives a glowing halo effect 
 	 * around the lit LEDs.  Use with care though - a little goes a long way.
 	 * The exposure setting here has enough range to make completely washed 
 	 * out displays.<p> 
-	 * The default value for exposure is 8. A setting of 0 turns the effect off, and
-	 * settings between 20 and 32, depending on your LED pattern, produce a good
-	 * "overexposed" video look. 
+	 * This value is essentially a luminance multiplier. It controls the base 
+	 * ambient light level plus a bloom effect.  The default value is 1.
+	 * A setting of 0 turns the effect completely off, and settings above 1 
+	 * produce increasingly "overexposed" images.
 	 * @param x
 	 */
-	public void setExposure(int x) {
-		exposure = PApplet.constrain(x,0,255);
+	public void setExposure(float x) {
+		ambient_light = PApplet.constrain(x,0,255);
 	}
 	
 	public void setFalloff(float v) {	
@@ -160,7 +159,7 @@ public class RendererR2D extends LEDRenderer {
 		case LEDMODEL_BULB:
 		case LEDMODEL_SMD:
 			// rebuild LED core appearance model
-			ledModel = new LightModel(pApp,pg,lightMap,ledSize,exposure,model);
+			ledModel = new LightModel(pApp,pg,lightMap,ledSize,ambient_light,model);
 			break;			
 		default:
 			break;

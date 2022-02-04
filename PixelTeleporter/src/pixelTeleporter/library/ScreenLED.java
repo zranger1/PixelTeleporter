@@ -112,7 +112,7 @@ public class ScreenLED {
 	 * sets rgb color to the specified brightness level
 	 * @param col - packed 24-bit ARGB color
 	 * @param bri - brightness level (0 to 1)
-	 * @return
+	 * @return RGB color at specified brightness level
 	 */
 	public static int setBrightness(int col,float bri) {
 		  int r = (col >> 16) & 0xFF;

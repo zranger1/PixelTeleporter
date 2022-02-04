@@ -1,7 +1,7 @@
 // Pixel Teleporter volumetric MapIO example
 // Build a displayable object from an exported Pixelblaze pixel map.
 //
-// 8/26/2020 JEM (ZRanger1)
+// 8/26/2020 JEM (ZRanger1);
 import pixelTeleporter.library.*;
 import java.util.*;
 
@@ -18,8 +18,9 @@ void setup() {
   pt.setElementSize(40,100);   // set display "led" size
   pt.setRenderMethod(RenderMethod.HD2D);
   pt.setRenderControl(RenderControl.LEDMODEL_SMD,0);  
-  pt.setRenderControl(RenderControl.FALLOFF,2);
-  pt.setRenderControl(RenderControl.BGALPHA,0);
+  pt.setRenderControl(RenderControl.FALLOFF,1.52);
+  pt.setRenderControl(RenderControl.INDIRECT_INTENSITY,0.35);  
+  //pt.setRenderControl(RenderControl.BGALPHA,0);
 
 // read JSON pixel map from file
   object = 

@@ -10,14 +10,13 @@ import pixelTeleporter.library.*;
 import java.util.*;
 
 // constants
-final int numRows=16; 
-final int numCols=16; 
+final int numRows=8; 
+final int numCols=32; 
 
 // global variables
 PixelTeleporter pt;
 LinkedList<ScreenLED> panel;    // list of LEDs in our matrix w/position and color info
-PShader bloom;
-
+PShader blur;
 
 // build 2D LED Matrix centered on the origin
 LinkedList<ScreenLED> buildMatrix(int dimX,int dimY) {
@@ -44,27 +43,19 @@ LinkedList<ScreenLED> buildMatrix(int dimX,int dimY) {
 }
 
 void setup() {
-  size(800,800,P3D);     // Set up the stage 
+  size(1200,400,P3D);     // Set up the stage 
   
   pt = new PixelTeleporter(this,"192.168.1.42");
-  pt.setElementSize(40,90);
-  
-  // All the available rendering controls!
+  pt.setElementSize(22,100);
   pt.setRenderMethod(RenderMethod.HD2D);
-  //pt.setRenderControl(RenderControl.LEDMODEL_BULB,0);  
-  pt.setRenderControl(RenderControl.LEDMODEL_SMD,0);    
+  pt.setRenderControl(RenderControl.LEDMODEL_BULB,0);  
   pt.setRenderControl(RenderControl.FALLOFF,2);
-  pt.setRenderControl(RenderControl.INDIRECT_INTENSITY,0.35); 
-  pt.setRenderControl(RenderControl.AMBIENT_LIGHT,16);
-  pt.setRenderControl(RenderControl.OVEREXPOSURE,0.75);
-  pt.setRenderControl(RenderControl.GAMMA,1.0);
-  //pt.setRenderControl(RenderControl.BGALPHA,0);  
+  pt.setRenderControl(RenderControl.INDIRECT_INTENSITY,0.35);  
+  pt.setRenderControl(RenderControl.BGALPHA,0);  
   
 
 // Optional - load single pass blur shader
-  bloom = loadShader("bloom.glsl");
-  bloom.set("overdrive",1.0);
-  bloom.set("gamma",1.0);  
+  blur = loadShader("blur.glsl");
   
   panel = buildMatrix(numCols,numRows);
    
@@ -76,8 +67,7 @@ void draw() {
 
 // draw LED matrix
   pt.draw(panel);
-  
-// Testing!  Apply overexposure shader. 
 
-  filter(bloom);          
+// Optional - Apply blur shader. 
+  filter(blur);          
 }

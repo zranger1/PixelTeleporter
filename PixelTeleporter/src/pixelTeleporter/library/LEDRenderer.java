@@ -17,11 +17,15 @@ public class LEDRenderer {
 	// Renderer controls.  The base class stores the superset of controls
 	// used by the various renderers, so control settings can persist if
 	// the user switches rendering methods midstream.
-	float exposure;      // light level for model camera 
-	float falloff;       // how fast light from the LED attenuates across the scene
+	float ambient_light;      // light level(base ambient + bloom level) for model camera 
+	float falloff;       // how fast indirect light from the LED attenuates across the scene
+	float indirectIntensity;  // initial brightness of indirect light (before falloff)
+	float overexposure;  // model CCD oversaturation
+	float gamma;         // power factor for correcting LED colors
 	int bgColor;         // RGB color of the "PCB" background behind the LEDs
 	int bgAlpha;         // transparency of background
 	LEDType model;      // LED light map appearance model. 
+
 	
 	LEDRenderer(PixelTeleporter pt) {
 		this.pt = pt;
@@ -33,8 +37,11 @@ public class LEDRenderer {
 	
 	// reasonable defaults for all control values
 	void resetControls() {
-		exposure = 8;
+		ambient_light = 8;
+        indirectIntensity = (float) 0.75;		
 		falloff = (float) 2;
+		overexposure = 0;
+		gamma = 1;
 		bgColor = 8;
 		bgAlpha = 255;
 		model = LEDType.BULB;
@@ -45,11 +52,14 @@ public class LEDRenderer {
 		worldYSize = r.worldYSize;
 		worldZSize = r.worldZSize;
 		
-		exposure = r.exposure; 
+		ambient_light = r.ambient_light; 
+        indirectIntensity = r.indirectIntensity;		
 		falloff  = r.falloff;
+		overexposure = r.overexposure;
+		gamma    = r.gamma;
 		bgColor  = r.bgColor;
 		bgAlpha  = r.bgAlpha;
-        model =    r.model;		
+        model    = r.model;	
 	}
 	
 	// set control values for the high def renderer
@@ -58,23 +68,32 @@ public class LEDRenderer {
 		case RESET:
             resetControls();
 			break;
-		case EXPOSURE:
-			exposure = (int) value;
+		case AMBIENT_LIGHT:
+			ambient_light = pApp.constrain(value,0,255);
 			break;
 		case FALLOFF:
-			falloff = value;
+			falloff = pApp.constrain(value,0,10);
 			break;
 		case BGCOLOR:
 			bgColor = (int) value;
 			break;
 		case BGALPHA:
-			bgAlpha = (int) value;
+			bgAlpha = (int) pApp.constrain(value,0,255);
 			break;
 		case LEDMODEL_BULB:			
 			model = LEDType.BULB;		
 			break;
 		case LEDMODEL_SMD:	
 			model = LEDType.SMD;
+			break;
+		case INDIRECT_INTENSITY:
+			indirectIntensity = pApp.constrain(value,0,1);
+			break;
+		case OVEREXPOSURE:
+			overexposure = pApp.constrain(value,0,1000);
+			break;
+		case GAMMA:
+			gamma = pApp.constrain(value,0,2);
 			break;
 		}
 	}
