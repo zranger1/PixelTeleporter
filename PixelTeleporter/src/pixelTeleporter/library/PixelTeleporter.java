@@ -69,7 +69,8 @@ public class PixelTeleporter implements PConstants {
 	boolean autoDataActive = false;
 	boolean isController = false;
 	boolean isRunning = true;
-	static boolean showPixelInfo = false;
+	boolean showPixelInfo = false;
+	boolean showAxes = true;
 	TooltipHandler toolTip;
 	
 	LEDRenderer renderer = null;
@@ -572,7 +573,7 @@ public class PixelTeleporter implements PConstants {
 	 */ 	
 	public void draw(LinkedList <ScreenLED> obj) {
 		renderer.render(obj);
-		renderer.drawAxes();
+		if (showAxes) renderer.drawAxes();
 	}
 
 	/**
@@ -674,6 +675,10 @@ public class PixelTeleporter implements PConstants {
 					else {
 						enablePixelInfo();
 					}
+					break;
+				case 'X':  // toggle display of axes
+				case 'x':	
+					showAxes = !showAxes;
 					break;
 
 				default:
