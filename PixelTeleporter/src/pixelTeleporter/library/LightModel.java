@@ -210,7 +210,7 @@ class LightModel {
 		float alpha;
 
 		dx = mapSize / 2;
-		maxDist = (float) dx; //Math.sqrt(dx * dx + dx * dx);
+		maxDist = dx; // (float) Math.sqrt(dx * dx + dx * dx);
 		cx = xst + dx;
 		cy = yst + dx;
 

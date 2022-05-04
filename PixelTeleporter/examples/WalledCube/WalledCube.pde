@@ -11,8 +11,6 @@ import java.util.*;
 PixelTeleporter pt;           // network data handler
 LinkedList<ScreenLED> object; // list of LEDs in our object w/position and color info
 
-PShader shade;               // shader for post processing effect
-
 // build volumetric cube centered at origin
 LinkedList<ScreenLED> buildWalledCube(int dimX,int dimY,int dimZ) {
   LinkedList<ScreenLED> cube = new LinkedList<ScreenLED>(); 
@@ -48,8 +46,7 @@ LinkedList<ScreenLED> buildWalledCube(int dimX,int dimY,int dimZ) {
       z = zOffs + (dimZ * pixelSpacing);
       led = pt.ScreenLEDFactory(x,y,z);    
       led.setIndex(index++);
-      cube.add(led);
-      
+      cube.add(led);     
     }
   }
 
@@ -104,25 +101,21 @@ LinkedList<ScreenLED> buildWalledCube(int dimX,int dimY,int dimZ) {
   }
   return cube;
 }  
-
+ 
 void setup() {
   size(1000,1000,P3D);     // Set up the stage 
   
   pt = new PixelTeleporter(this,"192.168.1.42");  
   pt.setElementSize(20);   // set display "led" size  
-  
- // Optional - load and configure two pass blur shader    
-  shade = loadShader("blur.glsl");  
-  shade.set("blurSize",5);
-  shade.set("sigma",5.0f);
+  pt.setRenderControl(RenderControl.AMBIENT_LIGHT,16);  
 
 // build 10x10x10 (600 pixel) walled cube
   object = buildWalledCube(10,10,10); 
   
 // add slow rotation to enhance depth.  Spacebar toggles
 // rotation on/off, mouse wheel zooms, 'r' resets to original orientation.
-  pt.setRotation(0,0,0);
-  pt.setRotationRate(0,PI / 5000, 0);
+  pt.setRotation(PI/2,0,-PI / 2);
+  //pt.setRotationRate(0,PI / 5000, 0);
  
 // start listening on network thread   
   pt.start();
@@ -131,14 +124,6 @@ void setup() {
 void draw() {   
   background(30);
   
-// draw our walled cube  
+// draw our walled cube
   pt.draw(object);
-
-// Optional - Apply blur shader
-// If you need extra performance, comment out or remove
-// calls to shade.set and filter().    
-  shade.set("horizontalPass",0);
-  filter(shade);
-  shade.set("horizontalPass",1);  
-  filter(shade); 
 }

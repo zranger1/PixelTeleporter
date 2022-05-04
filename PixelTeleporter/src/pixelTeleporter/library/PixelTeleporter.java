@@ -36,6 +36,7 @@ import processing.data.JSONArray;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
+
 /**
     Manages communication with the PixelTeleporter server device
     and provides a framework for object rendering and basic user 
@@ -571,6 +572,7 @@ public class PixelTeleporter implements PConstants {
 	 */ 	
 	public void draw(LinkedList <ScreenLED> obj) {
 		renderer.render(obj);
+		renderer.drawAxes();
 	}
 
 	/**

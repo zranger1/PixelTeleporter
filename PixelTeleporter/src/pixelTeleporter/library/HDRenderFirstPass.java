@@ -56,7 +56,7 @@ public class HDRenderFirstPass extends LEDRenderer {
 		default:
 			System.out.println("Unsupported renderer requested from HDRenderFirstPass");
 			System.out.println("DRAW3D renderer selected.");						
-			pt.renderer = new Renderer2D(pt);
+			pt.renderer = new Renderer3D(pt);
 			break;
 		}	
 		pt.renderer.copyControlsFrom(this);
@@ -89,6 +89,10 @@ public class HDRenderFirstPass extends LEDRenderer {
 		  worldXSize = PApplet.abs(xmax-xmin);
 		  worldYSize = PApplet.abs(ymax-ymin);
 		  worldZSize = PApplet.abs(zmax-zmin);
+		  
+		  axisOrigin.x = xmin;
+		  axisOrigin.y = ymin;
+		  axisOrigin.z = zmin;
 		}
 		else {
 			System.out.println("HDRenderFirstPass invoked on empty display list.");

@@ -63,21 +63,15 @@ public class ScreenLED {
 		int pix;
 		float size,mag;
 		
-		parent.app.pushMatrix();    
-		parent.app.translate(x,y,z);
+		//parent.app.pushMatrix();    
+		//parent.app.translate(x,y,z);
 		
-		// get pixel and set slightly transparent alpha
 		pix = parent.pixelBuffer[index];
-
-		//draw roughly larger sphere for roughly brighter pixel    
-		mag = parent.app.brightness(pix);
-		mag /= 255.0;
-		size = parent.ledSize + (parent.ledSize * mag);
-
-		parent.app.fill(pix,176);
-		parent.app.sphere(size);
 		
-		parent.app.popMatrix();
+		parent.app.stroke(pix);
+		parent.app.point(x,y,z);
+		
+		//parent.app.popMatrix();
 	}
 		
 	/**

@@ -82,9 +82,9 @@ class Mover implements PConstants{
 
 	void applyMouseRotation() {
 		parent.app.translate(mouseTranslation.x,mouseTranslation.y,0);    	
-		parent.app.rotateX(-mouseRotation.y);
-		parent.app.rotateY(mouseRotation.x);
-		parent.app.rotateZ(mouseRotation.z);
+		parent.app.rotateX(-mouseRotation.y+currentRotation.x);
+		parent.app.rotateY(mouseRotation.x+currentRotation.y);
+		parent.app.rotateZ(mouseRotation.z+currentRotation.z);
 	}
 	
 	void applyObjectTransform() {
@@ -103,8 +103,9 @@ class Mover implements PConstants{
 
 		applyMouseRotation();
 	
-		parent.app.rotateX(currentRotation.x);
-		parent.app.rotateY(currentRotation.y);
-		parent.app.rotateZ(currentRotation.z);
+		// rotate around x so z axis is up/down for Pixelblaze compatibility
+		//parent.app.rotateX(currentRotation.x);
+		//parent.app.rotateY(currentRotation.y);
+		//parent.app.rotateZ(currentRotation.z);
 	} 
 }
