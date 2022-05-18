@@ -20,7 +20,7 @@ varying vec2 outPos;
 #define ELEMENT_SIZE 0.995
 #define MIN_BRIGHTNESS ambient
 #define SPECULAR_BRI (MIN_BRIGHTNESS * 1.5)
-#define OFF_THRESHOLD 0.005
+#define OFF_THRESHOLD 0.005 
 
 #define LINE_WIDTH 0.012
 
@@ -40,16 +40,16 @@ void main() {
   vec3 ledBaseColor = vec3(MIN_BRIGHTNESS);
   
   // first, linear falloff based on distance from center
-  vec4 color = vertColor;
+  vec4 color = vertColor; 
   color.a = dist;
   
   // now our plastic LED bulb, with fake specular highlighting
   color += vec4(ledBaseColor,step(CORE_SIZE,d1) * dist);
-  color.a += MIN_BRIGHTNESS * smoothstep(LINE_WIDTH,0.0,abs(RING_SIZE-d1));
-  color += (SPECULAR_BRI * smoothstep(0.,ELEMENT_SIZE,d2));
+  color.a += MIN_BRIGHTNESS * smoothstep(LINE_WIDTH,0.0,abs(RING_SIZE-d1)); 
+  color += (SPECULAR_BRI * smoothstep(0.,ELEMENT_SIZE,d2));  
   
   // brighten color slightly in center.  
-  color += vertColor * 1.2 * smoothstep(0.,ELEMENT_SIZE,dist*dist);
+  color += vertColor * 1.2 * smoothstep(0.,ELEMENT_SIZE,dist*dist);    
    
   gl_FragColor = color;
 }

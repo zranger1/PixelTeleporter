@@ -572,55 +572,12 @@ public class PixelTeleporter implements PConstants {
 	 * transform.<p>
 	 */ 	
 	public void draw(LinkedList <ScreenLED> obj) {
+		app.pushMatrix();
 		renderer.render(obj);
 		if (showAxes) renderer.drawAxes();
-	}
-
-	/**
-	 * @deprecated 
-	 * Use new draw() method instead.
-	 * @see #draw
-	 * @see #setRenderMethod
-	 */
-	@Deprecated
-	public void render2D(LinkedList <ScreenLED> obj) {
-		renderer.render(obj);
-	}
-
-	/**
-	 * @deprecated
-	 * Use new draw() method instead. 
-	 * @see #draw
-	 * @see #setRenderMethod
-	 */
-	@Deprecated
-	public void render3D(LinkedList <ScreenLED> obj) {
-		app.pushMatrix();
-		mover.applyObjectTransform();
-
-		for (ScreenLED led : obj) {
-			led.draw3D();
-		}   
-		app.popMatrix();
-	}	
-
-	/**
-	 * @deprecated
-	 * Use new draw() method instead 
-	 * @see #draw
-	 * @see #setRenderMethod
-	 */
-	@Deprecated
-	public void renderShape(LinkedList <ScreenShape> obj) {
-		app.pushMatrix();
-		mover.applyObjectTransform();
-
-		for (ScreenShape led : obj) {
-			led.draw3D();
-		}   
 		app.popMatrix();
 	}
-	
+
 	public void pre() {
 		bg.showImage(); 
 		readData();

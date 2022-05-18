@@ -103,7 +103,7 @@ class Mover implements PConstants{
 
 		applyMouseRotation();
 	
-		// rotate around x so z axis is up/down for Pixelblaze compatibility
+		//rotate around x so z axis is up/down for Pixelblaze compatibility
 		//parent.app.rotateX(currentRotation.x);
 		//parent.app.rotateY(currentRotation.y);
 		//parent.app.rotateZ(currentRotation.z);

@@ -1,6 +1,4 @@
 package pixelTeleporter.library;
-import java.net.URL;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import processing.core.*;
 import processing.opengl.PShader;
@@ -30,12 +28,16 @@ public class LEDRenderer {
 	int bgColor;         // RGB color of the "PCB" background behind the LEDs
 	int bgAlpha;         // transparency of background
 	LEDType model;      // LED light map appearance model. 
-
+	int xColor,yColor,zColor; // axis legend colors
+	
 	
 	LEDRenderer(PixelTeleporter pt) {
 		this.pt = pt;
 		pApp = pt.app;
 		axisOrigin = new PVector();
+		xColor = pApp.color(255,0,0);
+		yColor = pApp.color(0,255,0);
+		zColor = pApp.color(0,0,255);
 		resetControls();
 	}
 	
@@ -112,15 +114,6 @@ public class LEDRenderer {
 		s.set(worldXSize,worldYSize,worldZSize);
 	}
 	
-	// NOTE - shader names must include extension.  It saves work for ME!
-	public void loadShader(String fragment, String vertex) {
-	  String path = getLibPath();
-	  System.out.println(path);
-	  shader = pApp.loadShader(Paths.get(path, "shaders", fragment).toString(),
-                       		  Paths.get(path, "shaders", vertex).toString());
-	}	
-	
-	
 	// TODO - add billboard text textures as axis labels, and make this thing
 	// a PShape.
 	public void drawAxes() {
@@ -136,64 +129,50 @@ public class LEDRenderer {
 		  
 		  // colored axes
 		  d = 200;
-		  pApp.pushMatrix();
+
 		  pApp.translate(axisOrigin.x,axisOrigin.y,axisOrigin.z);
 		  
-		  pApp.stroke(pApp.color(255,0,0));
+		  pApp.stroke(xColor);		  
 		  pApp.line(0,0,0,d,0,0);
-		  pApp.stroke(pApp.color(0,255,0));
-		  pApp.line(0,0,0,0,d,0);
-		  pApp.stroke(pApp.color(32,32,255));
-		  pApp.line(0,0,0,0,0,d);
-		  pApp.strokeWeight(sw);
 		  
-		  pApp.popMatrix();
+		  pApp.stroke(yColor);	  
+		  pApp.line(0,0,0,0,d,0);
+		  
+		  pApp.stroke(zColor);		  
+		  pApp.line(0,0,0,0,0,d);
+		  
+		  
+		  // calculate placement of axis label billboards
+		  float x1 = pApp.screenX(d,0,0);
+		  float y1 = pApp.screenY(d,0,0);
+		  float z1 = pApp.screenZ(d,0,0);
+		  
+		  float x2 = pApp.screenX(0,d,0);
+		  float y2 = pApp.screenY(0,d,0);
+		  float z2 = pApp.screenZ(0,d,0);
+		  
+		  float x3 = pApp.screenX(0,0,d);
+		  float y3 = pApp.screenY(0,0,d);
+		  float z3 = pApp.screenZ(0,0,d);		  		  
+		  
+		  // label axes
+		  pApp.resetMatrix();
+		  pApp.textMode(PConstants.MODEL);
+		  
+		  pApp.textSize(44);
+		  pApp.textAlign(PConstants.CENTER,PConstants.CENTER);
+		  pApp.fill(xColor);
+		  pApp.text("X",x1,y1);
+		  pApp.fill(yColor);
+		  pApp.text("Y",x2,y2);
+		  pApp.fill(zColor);
+		  pApp.text("Z",x3,y3);	
+		  
+		  pApp.strokeWeight(sw);
 		}
 	
-    private String getLibPath() {
-        URL url = this.getClass().getResource(PixelTeleporter.class.getSimpleName() + ".class");
-        if (url != null) {
-            // Convert URL to string, taking care of spaces represented by the "%20"
-            // string.
-            String path = url.toString().replace("%20", " ");
-
-            if (!path.contains(".jar"))
-                return pApp.sketchPath();
-
-            int n0 = path.indexOf('/');
-
-            int n1 = -1;
-
-            // read jar file name
-            String fullJarPath = PixelTeleporter.class.getProtectionDomain()
-                    .getCodeSource()
-                    .getLocation()
-                    .getPath();
-
-            if (PApplet.platform == PConstants.WINDOWS) {
-                // remove leading slash in windows path
-                fullJarPath = fullJarPath.substring(1);
-            }
-
-            String jar = Paths.get(fullJarPath).getFileName().toString();
-
-            n1 = path.indexOf(jar);
-            if (PApplet.platform == PConstants.WINDOWS) {
-                // remove leading slash in windows path
-                n0++;
-            }
-
-            if ((-1 < n0) && (-1 < n1)) {
-                return path.substring(n0, n1);
-            } else {
-                return pApp.sketchPath();
-            }
-        }
-        return pApp.sketchPath();
-    }		
 	
 
-	
 	// do nothing
 	void render(LinkedList <ScreenLED> obj) {
 	   ;	

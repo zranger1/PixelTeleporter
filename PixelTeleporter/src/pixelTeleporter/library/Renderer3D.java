@@ -16,7 +16,7 @@ class Renderer3D extends LEDRenderer {
 	}
 		
 	void initialize() { 
-		loadShader("pointfrag.glsl","pointvertex.glsl");
+		this.shader = PTUtils.loadShader(pApp,"pointfrag.glsl","pointvertex.glsl");
 		pApp.strokeCap(PConstants.SQUARE);		
 		pApp.hint(PConstants.ENABLE_STROKE_PERSPECTIVE);
 		pApp.hint(PConstants.DISABLE_DEPTH_TEST);			
@@ -29,7 +29,6 @@ class Renderer3D extends LEDRenderer {
 	public void render(LinkedList <ScreenLED> obj) {
 		pApp.blendMode(PConstants.ADD);
 
-		pApp.pushMatrix();
 		pt.mover.applyObjectTransform();
 		this.shader.set("time",(float) (pApp.millis()/1000.0));
 		pApp.shader(this.shader,PConstants.POINTS);		
@@ -38,6 +37,5 @@ class Renderer3D extends LEDRenderer {
 			led.draw3D();
 		}   
 		pApp.resetShader();
-		pApp.popMatrix();
 	}
 }
