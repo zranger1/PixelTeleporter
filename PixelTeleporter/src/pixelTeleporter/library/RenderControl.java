@@ -19,6 +19,7 @@ package pixelTeleporter.library;
  */
 public enum RenderControl {
 	RESET,
+	WEIGHT,
 	AMBIENT_LIGHT,
 	FALLOFF,
 	BGCOLOR,

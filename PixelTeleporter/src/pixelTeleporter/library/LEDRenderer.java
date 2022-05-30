@@ -10,6 +10,7 @@ public class LEDRenderer {
 	PApplet pApp;
 	PShader shader;
 	PVector axisOrigin;
+	AxisLegend axis;
 	
 	// world bounding cube. Not used by all renderers, but will be filled
 	// in on the first frame for those that need it.
@@ -20,6 +21,7 @@ public class LEDRenderer {
 	// Renderer controls.  The base class stores the superset of controls
 	// used by the various renderers, so control settings can persist if
 	// the user switches rendering methods midstream.
+	float weight;        // dimension of billboard used by shader
 	float ambient_light;      // light level(base ambient + bloom level) for model camera 
 	float falloff;       // how fast indirect light from the LED attenuates across the scene
 	float indirectIntensity;  // initial brightness of indirect light (before falloff)
@@ -35,16 +37,20 @@ public class LEDRenderer {
 		this.pt = pt;
 		pApp = pt.app;
 		axisOrigin = new PVector();
+		axis = new AxisLegend(this);
 		xColor = pApp.color(255,0,0);
 		yColor = pApp.color(0,255,0);
 		zColor = pApp.color(0,0,255);
 		resetControls();
 	}
 	
-	void initialize() { ; }
+	void initialize() { 
+		axis.initialize();
+	}
 	
 	// reasonable defaults for all control values
 	void resetControls() {
+		weight = 100;
 		ambient_light = 8;
         indirectIntensity = (float) 0.75;		
 		falloff = (float) 2;
@@ -63,6 +69,7 @@ public class LEDRenderer {
 		
 		axisOrigin = r.axisOrigin;
 		
+		weight = r.weight;
 		ambient_light = r.ambient_light; 
         indirectIntensity = r.indirectIntensity;		
 		falloff  = r.falloff;
@@ -79,6 +86,9 @@ public class LEDRenderer {
 		switch(ctl) {
 		case RESET:
             resetControls();
+			break;
+		case WEIGHT:
+			weight = PApplet.constrain(value,0,2000);
 			break;
 		case AMBIENT_LIGHT:
 			ambient_light = PApplet.constrain(value,0,255);
@@ -114,65 +124,10 @@ public class LEDRenderer {
 		s.set(worldXSize,worldYSize,worldZSize);
 	}
 	
-	// TODO - add billboard text textures as axis labels, and make this thing
-	// a PShape.
 	public void drawAxes() {
-		  float sw = pApp.getGraphics().strokeWeight;
-
-		  // origin marker
-		  float d = 20;
-		  pApp.stroke(128);
-		  pApp.strokeWeight(2);
-		  pApp.line(-d,0,0,d,0,0);
-		  pApp.line(0,-d,0,0,d,0);
-		  pApp.line(0,0,-d,0,0,d);	  
-		  
-		  // colored axes
-		  d = 200;
-
-		  pApp.translate(axisOrigin.x,axisOrigin.y,axisOrigin.z);
-		  
-		  pApp.stroke(xColor);		  
-		  pApp.line(0,0,0,d,0,0);
-		  
-		  pApp.stroke(yColor);	  
-		  pApp.line(0,0,0,0,d,0);
-		  
-		  pApp.stroke(zColor);		  
-		  pApp.line(0,0,0,0,0,d);
-		  
-		  
-		  // calculate placement of axis label billboards
-		  float x1 = pApp.screenX(d,0,0);
-		  float y1 = pApp.screenY(d,0,0);
-		  float z1 = pApp.screenZ(d,0,0);
-		  
-		  float x2 = pApp.screenX(0,d,0);
-		  float y2 = pApp.screenY(0,d,0);
-		  float z2 = pApp.screenZ(0,d,0);
-		  
-		  float x3 = pApp.screenX(0,0,d);
-		  float y3 = pApp.screenY(0,0,d);
-		  float z3 = pApp.screenZ(0,0,d);		  		  
-		  
-		  // label axes
-		  pApp.resetMatrix();
-		  pApp.textMode(PConstants.MODEL);
-		  
-		  pApp.textSize(44);
-		  pApp.textAlign(PConstants.CENTER,PConstants.CENTER);
-		  pApp.fill(xColor);
-		  pApp.text("X",x1,y1);
-		  pApp.fill(yColor);
-		  pApp.text("Y",x2,y2);
-		  pApp.fill(zColor);
-		  pApp.text("Z",x3,y3);	
-		  
-		  pApp.strokeWeight(sw);
-		}
+		axis.draw();
+	}
 	
-	
-
 	// do nothing
 	void render(LinkedList <ScreenLED> obj) {
 	   ;	

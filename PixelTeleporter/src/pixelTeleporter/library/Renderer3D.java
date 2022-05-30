@@ -16,19 +16,22 @@ class Renderer3D extends LEDRenderer {
 	}
 		
 	void initialize() { 
-		this.shader = PTUtils.loadShader(pApp,"pointfrag.glsl","pointvertex.glsl");
+		super.initialize();
+		this.shader = pt.ptf.loadShader("star.glsl","pointvertex.glsl");
 		pApp.strokeCap(PConstants.SQUARE);		
 		pApp.hint(PConstants.ENABLE_STROKE_PERSPECTIVE);
 		pApp.hint(PConstants.DISABLE_DEPTH_TEST);			
 		pApp.hint(PConstants.ENABLE_DEPTH_SORT);				
-		pApp.strokeWeight(100);
-		this.shader.set("weight",(float) 100.0);	
+		pApp.strokeWeight(weight);
+		this.shader.set("weight",weight);	
 		this.shader.set("ambient",(float)(ambient_light / 255.0));		
      }
 	
 	public void render(LinkedList <ScreenLED> obj) {
+		pApp.strokeWeight(weight);
+		this.shader.set("weight",weight);
 		pApp.blendMode(PConstants.ADD);
-
+		
 		pt.mover.applyObjectTransform();
 		this.shader.set("time",(float) (pApp.millis()/1000.0));
 		pApp.shader(this.shader,PConstants.POINTS);		
@@ -36,6 +39,5 @@ class Renderer3D extends LEDRenderer {
 		for (ScreenLED led : obj) {
 			led.draw3D();
 		}   
-		pApp.resetShader();
 	}
 }

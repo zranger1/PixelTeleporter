@@ -67,9 +67,9 @@ public class HDRenderFirstPass extends LEDRenderer {
 		float xmin,ymin,zmin;
 		float xmax,ymax,zmax;
 				
-		// hopefully, nobody's using coordinates in the 9 million+ range
-		xmin = ymin = zmin = 9999999;
-		xmax = ymax = zmax = -9999999;
+		// hopefully, nobody's using coordinates in the 99 million+ range
+		xmin = ymin = zmin = 1E8f;
+		xmax = ymax = zmax = -1E8f;
 				
 		// find the range of each coordinate
 		for (ScreenLED led : obj) {

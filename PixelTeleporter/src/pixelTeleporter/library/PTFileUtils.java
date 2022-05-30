@@ -5,17 +5,25 @@ import java.util.LinkedList;
 import processing.core.*;
 import processing.opengl.PShader;
 
-public class PTUtils {
+public class PTFileUtils {
+	PApplet pApp;
+	
+	PTFileUtils(PApplet a) {
+	  pApp = a;
+	}
+	
+	
+	
 	// NOTE - shader names must include extension.  It saves work for ME!
-	public static PShader loadShader(PApplet pApp, String fragment, String vertex) {
-	  String path = getLibPath(pApp);
+	public PShader loadShader(String fragment, String vertex) {
+	  String path = getLibPath();
 	  System.out.println(path);
 	  return pApp.loadShader(Paths.get(path, "shaders", fragment).toString(),
                        		  Paths.get(path, "shaders", vertex).toString());
 	}	
 	
-    private static String getLibPath(PApplet pApp) {
-        URL url = pApp.getClass().getResource(PixelTeleporter.class.getSimpleName() + ".class");
+    private String getLibPath() {
+        URL url = this.getClass().getResource(PixelTeleporter.class.getSimpleName() + ".class");
         if (url != null) {
             // Convert URL to string, taking care of spaces represented by the "%20"
             // string.

@@ -76,7 +76,7 @@ vec3 drawParticles(vec2 uv, float timedelta) {
         
     if (part_int_factor_max*pint1>6.) {
       float pint = part_int_factor_max*(pow(pint1, ppow)/part_int_div)*mp_int;
-      pcol += vertColor.xyz*pint;
+      pcol += (ambient+vertColor.xyz)*pint;
     }
     return pcol;
 }

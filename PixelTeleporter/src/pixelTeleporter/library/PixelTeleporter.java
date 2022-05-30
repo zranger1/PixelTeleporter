@@ -62,6 +62,7 @@ public class PixelTeleporter implements PConstants {
 	PixelTeleporterThread thread;
 	Mover mover;
 	PTBackground bg;
+	PTFileUtils ptf;
 	int ledSize = 15;        
 	int pixelSize = 20;    
 	public int[] pixelBuffer;
@@ -100,6 +101,7 @@ public class PixelTeleporter implements PConstants {
 		thread = new PixelTeleporterThread(this,ipAddr,clientPort,serverPort,PIXEL_BUFFER_SIZE);
 		pixelBuffer = thread.getPixelBuffer();
 		bg = new PTBackground(app);
+		ptf = new PTFileUtils(app);
 		toolTip = new TooltipHandler();
 		setRenderMethod(RenderMethod.DEFAULT);
 		refCount++;
@@ -525,8 +527,8 @@ public class PixelTeleporter implements PConstants {
 	 */
 	public PVector findObjectCenter( LinkedList<ScreenLED> obj) {
 		PVector c = new PVector(0,0,0);
-		PVector mins = new PVector(0,0,0);
-		PVector maxes = new PVector(0,0,0);
+		PVector mins = new PVector(1E7f,1E7f,1E7f);
+		PVector maxes = new PVector(-1E7f,-1E7f,-1E7f);
 
 		for (ScreenLED led : obj) {
 			if (led.x < mins.x) mins.x = led.x; if (led.x > maxes.x) maxes.x = led.x;
@@ -534,9 +536,9 @@ public class PixelTeleporter implements PConstants {
 			if (led.z < mins.z) mins.z = led.z; if (led.z > maxes.z) maxes.z = led.z;    
 		}
 
-		c.x = (maxes.x - mins.x) / 2;
-		c.y = (maxes.y - mins.y) / 2;
-		c.z = (maxes.z - mins.z) / 2;
+		c.x = mins.x + (maxes.x - mins.x) / 2;
+		c.y = mins.y + (maxes.y - mins.y) / 2;
+		c.z = mins.z + (maxes.z - mins.z) / 2;
 
 		return c;
 	}   
@@ -572,10 +574,13 @@ public class PixelTeleporter implements PConstants {
 	 * transform.<p>
 	 */ 	
 	public void draw(LinkedList <ScreenLED> obj) {
+		app.pushStyle();
 		app.pushMatrix();
 		renderer.render(obj);
 		if (showAxes) renderer.drawAxes();
 		app.popMatrix();
+		app.resetShader();
+		app.popStyle();
 	}
 
 	public void pre() {
