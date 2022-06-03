@@ -100,7 +100,9 @@ public class AxisLegend {
 	}	
 
 	public void draw() {
-		// draw center marker and axes
+		// if we have a 3D universe, draw center marker and axes 
+		//if (parent.worldZSize == 0) return;
+		
 		pApp.shape(axis);
 		pApp.stroke(255);
 		

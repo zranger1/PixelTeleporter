@@ -17,14 +17,15 @@ class Renderer3D extends LEDRenderer {
 		
 	void initialize() { 
 		super.initialize();
-		this.shader = pt.ptf.loadShader("star.glsl","pointvertex.glsl");
+		this.shader = pt.ptf.loadShader("bulb.glsl","pointvertex.glsl");
 		pApp.strokeCap(PConstants.SQUARE);		
 		pApp.hint(PConstants.ENABLE_STROKE_PERSPECTIVE);
 		pApp.hint(PConstants.DISABLE_DEPTH_TEST);			
 		pApp.hint(PConstants.ENABLE_DEPTH_SORT);				
 		pApp.strokeWeight(weight);
 		this.shader.set("weight",weight);	
-		this.shader.set("ambient",(float)(ambient_light / 255.0));		
+		this.shader.set("ambient",(float)(ambient_light / 255.0));	
+		this.shader.set("falloff",falloff);
      }
 	
 	public void render(LinkedList <ScreenLED> obj) {

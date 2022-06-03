@@ -19,7 +19,7 @@ class Renderer2D extends LEDRenderer {
 		super(p);
 	}
 		
-	void initialize() { ; }
+	void initialize() { super.initialize(); }
 	
 	public void render(LinkedList <ScreenLED> obj) {
 		pApp.pushMatrix();

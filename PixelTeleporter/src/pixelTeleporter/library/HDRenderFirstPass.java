@@ -32,27 +32,14 @@ public class HDRenderFirstPass extends LEDRenderer {
 		// set the new renderer as active for the next frame.
 		switch(realRenderer) {
 		case DEFAULT: // select normal 2D or 3D based on world depth
-			if (worldZSize == 0) {
-				pt.renderer = new Renderer2D(pt);				
-			}
-			else {
-				pt.renderer = new Renderer3D(pt);				
-			}
-			break;
-		case DRAW2D:
-			pt.renderer = new Renderer2D(pt);
+			pt.renderer = new Renderer3D(pt);				
 			break;
 		case DRAW3D:
 			pt.renderer = new Renderer3D(pt);
 			break;
-		case HD2D: // 2D HD renderer
-            pt.renderer = new RendererR2D(pt);
+		case USER:
+			  // TODO - implement this
 			break;
-		case HD3D: // 3D HD renderer
-			System.out.println("3D HD renderer is not yet implemented.");
-			System.out.println("default 3D renderer (DRAW3D) selected.");
-			pt.renderer = new Renderer3D(pt);			
-			break;			
 		default:
 			System.out.println("Unsupported renderer requested from HDRenderFirstPass");
 			System.out.println("DRAW3D renderer selected.");						
@@ -97,7 +84,7 @@ public class HDRenderFirstPass extends LEDRenderer {
 		else {
 			System.out.println("HDRenderFirstPass invoked on empty display list.");
 			System.out.println("This is... not good... you'll need to fix it.");
-			realRenderer = RenderMethod.DRAW2D;
+			realRenderer = RenderMethod.DRAW3D;
 		}
 		
 		// first pass done.  Switch renderers next time this is 

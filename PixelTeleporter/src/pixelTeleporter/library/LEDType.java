@@ -1,10 +1,13 @@
 package pixelTeleporter.library;
 
 /**
- * Controls appearance of LEDs for 2D renderers 
+ * Controls appearance of LEDs 
  *
  */
 public enum LEDType {
 	BULB,
-	SMD
+	SMD,
+	STONE,
+	STAR,
+	CUSTOM
 }

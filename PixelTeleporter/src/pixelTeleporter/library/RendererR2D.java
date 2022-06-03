@@ -29,6 +29,7 @@ public class RendererR2D extends LEDRenderer {
 	}
 	
 	void initialize() {
+		super.initialize();
 		// create and configure offscreen surface for drawing
 		ledSize = pt.ledSize;
 		coreSize = (float) 0.55 * ledSize;
@@ -142,30 +143,16 @@ public class RendererR2D extends LEDRenderer {
 		ambient_light = PApplet.constrain(x,0,255);
 	}
 	
-	public void setFalloff(float v) {	
+	public void setFalloff(float v) {
+		super.setFalloff(v);
 		lightMap.beginDraw();	
 		setFalloffModel(lightMap,0,0,lightMap.width,v);
 		lightMap.endDraw();
 	}
-
-	// set control values for the high def renderer
-	public void setControl(RenderControl ctl, float value) {
-		super.setControl(ctl,value);
-		
-		switch(ctl) {
-		case FALLOFF:
-			setFalloff(value);
-			break;
-		case LEDMODEL_BULB:
-		case LEDMODEL_SMD:
-			// rebuild LED core appearance model
-			ledModel = new LightModel(pApp,pg,lightMap,ledSize,ambient_light,model);
-			break;			
-		default:
-			break;
-		}
-	}	
-
-
+	
+	public void setModel(LEDType value) {
+		super.setModel(value);
+		ledModel = new LightModel(pApp,pg,lightMap,ledSize,ambient_light,model);		
+	}
 
 }

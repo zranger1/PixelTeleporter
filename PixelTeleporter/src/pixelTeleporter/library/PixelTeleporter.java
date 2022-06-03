@@ -543,9 +543,88 @@ public class PixelTeleporter implements PConstants {
 		return c;
 	}   
 
-	public void setRenderControl(RenderControl ctl, float value) {
-		renderer.setControl(ctl,value);
+	/**
+	 * Sets size of billboard on which LED model is rendered.
+	 */	
+	public void setWeight(float value) {
+		renderer.setWeight(value);
 	}
+
+	/**
+	 * (0 - 255) the amount of ambient light the "camera" receives
+	 */	
+	public void setAmbientLight(float value) {
+		renderer.setAmbientLight(value);
+	}	
+	
+	/**
+	 * (0 - 10) how far light from LEDs travels in the scene
+	 */	
+	public void setFalloff(float value) {
+		renderer.setFalloff(value);
+	}	
+	
+	/**
+	 * RGB color of surface behind emitter
+	 */	
+	public void setBackgroundColor(int value) {
+		renderer.setBackgroundColor(value);
+	}	
+	
+	/**
+	 * (0 - 255) opacity of surface behind emitter
+	 */	
+	public void setBackgroundAlpha(int value) {
+      renderer.setBackgroundAlpha(value);
+	}	
+	
+	/**
+	 * (0.0 - 1.0) light intensity from sides of emitter
+	 */	
+	public void setIndirectIntensity(float value) {
+	  renderer.setIndirectIntensity(value);
+	}	
+	
+	/**
+	 * (0.0 - 1000) simulates CCD camera bloom
+	 */	
+    public void setExposure(float value) {
+       renderer.setOverexposure(value);
+    }
+    
+    /**
+     * (0.0 - 2) adjust displayed gamma to better match LED colors
+     */    
+    public void setGammaCorrection(float value) {
+    	renderer.setGammaCorrection(value);
+    }
+    
+    /**
+     * Choose type of LED to render.  Available types are:
+     * 	<li><strong>LEDType.BULB</strong> - capsule shaped LED</li>
+	 *  <li><strong>LEDType.SMD</strong> - square SMD LED</li>
+	 *  <li><strong>LEDType.STONE</strong> - small chunk of transparent sea glass</li>
+	 *  <li><strong>LEDType.STAR</strong> - a... star. Bright.  With rays.</li>
+     *  To specify a custom shader, use the SetModel(String fragment, String vertex) variant
+     *  of this method.
+     */
+    public void setModel(LEDType value) {
+    	renderer.setModel(value);
+    }
+
+    /**
+     * Choose type of LED to render.  Available types are:
+     * 	<li><strong>LEDType.BULB</strong> - capsule shaped LED</li>
+	 *  <li><strong>LEDType.SMD</strong> - square SMD LED</li>
+	 *  <li><strong>LEDType.STONE</strong> - small chunk of transparent sea glass</li>
+	 *  <li><strong>LEDType.STAR</strong> - a... star. Bright.  With rays.</li>
+     *  To specify a custom shader, use the SetModel(String fragment, String vertex) variant
+     *  of this method.
+     */   
+    public void setModel(String fragment,String vertex) {
+      renderer.setModel(fragment,vertex);
+    }    
+    
 
 	/**
 	 * Sets the method used to draw LED objects to the screen. Available methods are:
@@ -553,12 +632,6 @@ public class PixelTeleporter implements PConstants {
 	 * 
 	 * <li><strong>RenderMethod.DEFAULT</strong>  - renders ScreenObj lists in 2D and ScreenShape lists in 3D.  Fast and simple.</li>
 	 * <li><strong>RenderMethod.DRAW3D</strong>   - renders all objects in 3D space using Processing graphics API calls</li>
-	 * <li><strong>RenderMethod.REALISTIC2D</strong> - uses Processing API calls to render realistic video-quality LED objects.
-	 * Looks great, but performance will vary depending on your computer and GPU.</li> 
-	 * <li><strong>RenderMethod.FILE</strong> - records incoming LED data to a JSON file for later playback. Useful for making
-	 * movies and debugging.</li>
-	 * <li><strong>RenderMethod.SHADER3D</strong> - NOT YET IMPLEMENTED - Does nothing at the moment. (Uses OpenGL and GLSL to
-	 *  render highly detailed objects in 3D space. Performance may vary greatly depending on your GPU.) </li>
 	 */
 	public void setRenderMethod(RenderMethod m) {
 		LEDRenderer r = new HDRenderFirstPass(this,m);

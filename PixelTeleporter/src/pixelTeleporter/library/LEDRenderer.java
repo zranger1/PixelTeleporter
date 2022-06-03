@@ -48,7 +48,9 @@ public class LEDRenderer {
 		axis.initialize();
 	}
 	
-	// reasonable defaults for all control values
+	/**
+	 * set all renderer controls to their default values
+	 */	
 	void resetControls() {
 		weight = 100;
 		ambient_light = 8;
@@ -81,44 +83,90 @@ public class LEDRenderer {
         shader  = r.shader;
 	}
 	
-	// set control values for the high def renderer
-	public void setControl(RenderControl ctl, float value) {
-		switch(ctl) {
-		case RESET:
-            resetControls();
-			break;
-		case WEIGHT:
-			weight = PApplet.constrain(value,0,2000);
-			break;
-		case AMBIENT_LIGHT:
-			ambient_light = PApplet.constrain(value,0,255);
-			break;
-		case FALLOFF:
-			falloff = PApplet.constrain(value,0,10);
-			break;
-		case BGCOLOR:
-			bgColor = (int) value;
-			break;
-		case BGALPHA:
-			bgAlpha = (int) PApplet.constrain(value,0,255);
-			break;
-		case LEDMODEL_BULB:			
-			model = LEDType.BULB;		
-			break;
-		case LEDMODEL_SMD:	
-			model = LEDType.SMD;
-			break;
-		case INDIRECT_INTENSITY:
-			indirectIntensity = PApplet.constrain(value,0,1);
-			break;
-		case OVEREXPOSURE:
-			overexposure = PApplet.constrain(value,0,1000);
-			break;
-		case GAMMA:
-			gamma = PApplet.constrain(value,0,2);
-			break;
-		}
+    // Rendering control accessors
+	//
+	
+	/**
+	 * Sets size of billboard on which LED model is rendered.
+	 */	
+	public void setWeight(float value) {
+		weight = PApplet.constrain(value,0,2000);
 	}
+
+	/**
+	 * (0 - 255) the amount of ambient light the "camera" receives
+	 */	
+	public void setAmbientLight(float value) {
+		ambient_light = PApplet.constrain(value,0,255);
+	}	
+	
+	/**
+	 * (0 - 10) how far light from LEDs travels in the scene
+	 */	
+	public void setFalloff(float value) {
+		falloff = PApplet.constrain(value,0,10);
+	}	
+	
+	/**
+	 * RGB color of surface behind emitter
+	 */	
+	public void setBackgroundColor(int value) {
+		bgColor = value;
+	}	
+	
+	/**
+	 * (0 - 255) opacity of surface behind emitter
+	 */	
+	public void setBackgroundAlpha(int value) {
+		bgAlpha = PApplet.constrain(value,0,255);
+	}	
+	
+	/**
+	 * (0.0 - 1.0) light intensity from sides of emitter
+	 */	
+	public void setIndirectIntensity(float value) {
+		indirectIntensity = PApplet.constrain(value,0,1);
+	}	
+	
+	/**
+	 * (0.0 - 1000) simulates CCD camera bloom
+	 */	
+    public void setOverexposure(float value) {
+    	overexposure = PApplet.constrain(value,0,1000);
+    }
+    
+    /**
+     * (0.0 - 2) adjust displayed gamma to better match LED colors
+     */    
+    public void setGammaCorrection(float value) {
+    	gamma = PApplet.constrain(value,0,2);
+    }
+    
+    /**
+     * Choose type of LED to render.  Available types are:
+     * 	<li><strong>LEDType.BULB</strong> - capsule shaped LED</li>
+	 *  <li><strong>LEDType.SMD</strong> - square SMD LED</li>
+	 *  <li><strong>LEDType.STONE</strong> - small chunk of transparent sea glass</li>
+	 *  <li><strong>LEDType.STAR</strong> - a... star. Bright.  With rays.</li>
+     *  To specify a custom shader, use the SetModel(String fragment, String vertex) variant
+     *  of this method.
+     */
+    public void setModel(LEDType value) {
+    	model = value;
+    }
+
+    /**
+     * Choose type of LED to render.  Available types are:
+     * 	<li><strong>LEDType.BULB</strong> - capsule shaped LED</li>
+	 *  <li><strong>LEDType.SMD</strong> - square SMD LED</li>
+	 *  <li><strong>LEDType.STONE</strong> - small chunk of transparent sea glass</li>
+	 *  <li><strong>LEDType.STAR</strong> - a... star. Bright.  With rays.</li>
+     *  To specify a custom shader, use the SetModel(String fragment, String vertex) variant
+     *  of this method.
+     */   
+    public void setModel(String frag,String vert) {
+       model = LEDType.CUSTOM;
+    }
 	
 	void getWorldSize(PVector s) {
 		s.set(worldXSize,worldYSize,worldZSize);
