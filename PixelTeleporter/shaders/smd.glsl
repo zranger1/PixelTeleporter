@@ -14,10 +14,9 @@ varying vec2 outPos;
 #define SCALE 1.
 #define S2 (1-SCALE)
 #define RECT_SIZE (0.25 * SCALE)
-#define CORE_SIZE (0.165 * SCALE)
+#define CORE_SIZE (0.23 * SCALE)
 #define ELEMENT_SIZE (0.1 * SCALE)
-#define SQRT2 1.41421356
-#define LINE_WIDTH 0.012
+
 
 // simple 2D box SDF with rounded corners
 // b = width/height of box
@@ -28,12 +27,12 @@ float sdRoundBox(vec2 p,float b,float r ) {
 }
 
 void main() {
-  // normalize coords to local range -1 to 1
-  vec2 uv = 2 *(outPos - center) / weight;
-     
-  float d = clamp((SQRT2 - length(uv))/ SQRT2,0.0,1.0); 
-  float d2 = pow(d,falloff); // d * d;
-  float d4 = d2 * d2;
+  float radius = weight / 2.0;
+  vec2 uv = (outPos / weight)*2.;  // scale range to (-1, 1)  
+  
+  // calculate normalized distance from center
+  float d = clamp((radius - length(outPos))/radius,0.,1.);    
+  float d2 = pow(d,falloff); 
   
   // calculate light falloff based on distance from center
   vec4 color = vec4(vertColor.xyz,d2);  
@@ -52,7 +51,7 @@ void main() {
 
   // and brighten color in center area enough to wash away the outer square at
   // high brightnesses
-  dist =  smoothstep(0.,1.-ELEMENT_SIZE,d4);
+  dist =  smoothstep(0.,1.-ELEMENT_SIZE,d*d*d*d);
   color.xyz += vertColor.xyz * 1.2 * dist; 
   color.a += dist;
 

@@ -17,7 +17,6 @@ class Renderer3D extends LEDRenderer {
 		
 	void initialize() { 
 		super.initialize();
-		this.shader = pt.ptf.loadShader("bulb.glsl","pointvertex.glsl");
 		pApp.strokeCap(PConstants.SQUARE);		
 		pApp.hint(PConstants.ENABLE_STROKE_PERSPECTIVE);
 		pApp.hint(PConstants.DISABLE_DEPTH_TEST);			

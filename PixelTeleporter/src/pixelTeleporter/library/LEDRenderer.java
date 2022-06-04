@@ -60,8 +60,7 @@ public class LEDRenderer {
 		gamma = 1;
 		bgColor = 8;
 		bgAlpha = 255;
-		model = LEDType.BULB;
-		shader = null;
+		setModel(LEDType.BULB);
 	}
 	
 	void copyControlsFrom(LEDRenderer r) {
@@ -153,20 +152,54 @@ public class LEDRenderer {
      */
     public void setModel(LEDType value) {
     	model = value;
+    	String frag = new String();
+    	
+    	switch(model) {
+    	case BULB:
+    		frag = new String("bulb.glsl");
+    		break;
+    	case SMD:
+    		frag = new String("smd.glsl");    		
+    		break;
+    	case STONE:
+    		frag = new String("stone.glsl");    		
+    		break;
+    	case STAR:
+    		frag = new String("star.glsl");    		
+    		break;
+  
+    	}
+    	
+    	this.shader = pt.ptf.loadShader(frag,"pointvertex.glsl");    	
     }
 
+    /**
+     * Choose type of LED to render.  Available types are:
+     * 	<li><strong>LEDType.BULB</strong> - capsule shaped LED</li>
+	 *  <li><strong>LEDType.SMD</strong>  - square SMD LED</li>
+	 *  <li><strong>LEDType.STONE</strong> - small chunk of transparent sea glass</li>
+	 *  <li><strong>LEDType.STAR</strong> - a... star. Bright.  With rays.</li>
+     *  To specify a custom shader, use the SetModel(String fragment, String vertex) variant
+     *  of this method.
+     */   
+    public void setModel(String fragment,String vertex) {
+       model = LEDType.CUSTOM;
+       // TODO - load model given path, starting with sketch /data dir
+       // if vertex renderer string is empty, use default.
+    }
+    
     /**
      * Choose type of LED to render.  Available types are:
      * 	<li><strong>LEDType.BULB</strong> - capsule shaped LED</li>
 	 *  <li><strong>LEDType.SMD</strong> - square SMD LED</li>
 	 *  <li><strong>LEDType.STONE</strong> - small chunk of transparent sea glass</li>
 	 *  <li><strong>LEDType.STAR</strong> - a... star. Bright.  With rays.</li>
-     *  To specify a custom shader, use the SetModel(String fragment, String vertex) variant
-     *  of this method.
+     *  To specify a custom shader, use the SetModel(String fragment) or 
+     *  SetModel(String fragment, String vertex) variants of this method.
      */   
-    public void setModel(String frag,String vert) {
-       model = LEDType.CUSTOM;
-    }
+    public void setModel(String fragment) {
+       setModel(fragment,"pointvertex.glsl");
+    }    
 	
 	void getWorldSize(PVector s) {
 		s.set(worldXSize,worldYSize,worldZSize);
