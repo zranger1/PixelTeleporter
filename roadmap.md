@@ -56,6 +56,7 @@ could act as a proxy for how far the light from a single LED can travel.  (but s
 - 2D-ish SMD model
 - strip model.  Maybe ribbon with curves?
 - add shaders for panel/diffuser objects (even, edge lit, center lit, diffusion %/ focus)
+- rotational behavior of SMD model is strange, and possibly should be fixed.
 
 # Things to Do
 shader selection API -- maybe setRenderThingie(MODEL,CUSTOM), then setCustomShader("fragment","vertex");

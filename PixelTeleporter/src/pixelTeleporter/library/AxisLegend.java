@@ -52,16 +52,16 @@ public class AxisLegend {
 		axis.addChild(sh);
 
 		// axis markers at edge of object model
-		edgeX = parent.worldXSize / 2;
-		edgeY = parent.worldYSize / 2;
-		edgeZ = parent.worldZSize / 2;
+		edgeX = parent.axisOrigin.x;
+		edgeY = parent.axisOrigin.y;
+		edgeZ = parent.axisOrigin.z;
 		
 		sh = pApp.createShape();
 		sh.beginShape(PConstants.LINES);
 		sh.strokeWeight(2);	
-		sh.translate(edgeX,edgeY,edgeZ);
+		sh.translate(-edgeX,-edgeY,-edgeZ);
 		// x
-		float l = -axisLength;
+		float l = axisLength;
 		sh.stroke(255,0,0);
 		sh.vertex(0,0,0);
 		sh.vertex(l,0,0);
@@ -78,10 +78,10 @@ public class AxisLegend {
 		
 		axis.addChild(sh);
 		
-		l -= 10;
-		xTag.set(edgeX + l,edgeY,edgeZ);
-		yTag.set(edgeX,edgeY + l,edgeZ);
-		zTag.set(edgeX,edgeY,edgeZ + l);
+		l += -10;
+		xTag.set(-edgeX + l,-edgeY,-edgeZ);
+		yTag.set(-edgeX,-edgeY + l,-edgeZ);
+		zTag.set(-edgeX,-edgeY,-edgeZ + l);
 
 	} 	
 

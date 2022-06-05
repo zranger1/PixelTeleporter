@@ -33,8 +33,6 @@ package pixelTeleporter.library;
 import java.util.*;
 import processing.core.*;
 import processing.data.JSONArray;
-import processing.event.KeyEvent;
-import processing.event.MouseEvent;
 
 
 /**
@@ -53,7 +51,7 @@ import processing.event.MouseEvent;
  maybe timestamp of each frame so we can make the deltas the same.)
 
  RenderType.USER renderer support??
- 
+
  Recieve from multiple transport types - PT Classic, PT Broadcast, Artnet, etc..
  */
 
@@ -73,9 +71,9 @@ public class PixelTeleporter implements PConstants {
 	boolean showPixelInfo = false;
 	boolean showAxes = true;
 	TooltipHandler toolTip;
-	
+
 	LEDRenderer renderer = null;
-	private final ptEventListener ptEventListener = new ptEventListener();
+	ptEventListener eventListener;
 
 	// global pt object reference counter 
 	static int refCount = 0; 
@@ -84,7 +82,6 @@ public class PixelTeleporter implements PConstants {
 	public final static String VERSION = "##library.prettyVersion##";	
 	final int MAX_PIXELS = 4096;
 	final int PIXEL_BUFFER_SIZE=(256+(MAX_PIXELS * 3)); 
-	final int MOUSE_MIN_MOVEMENT = 10; // dead zone for mouse UI rotate/translate
 
 	/**
 	 * Creates and initializes a PixelTeleporter object.
@@ -101,9 +98,11 @@ public class PixelTeleporter implements PConstants {
 		thread = new PixelTeleporterThread(this,ipAddr,clientPort,serverPort,PIXEL_BUFFER_SIZE);
 		pixelBuffer = thread.getPixelBuffer();
 		bg = new PTBackground(app);
-		ptf = new PTFileUtils(app);
+		ptf = new PTFileUtils(this);
 		toolTip = new TooltipHandler();
-		setRenderMethod(RenderMethod.DEFAULT);
+		renderer = new Renderer3D(this);
+		renderer.initialize();
+
 		refCount++;
 
 		// register cleanup function
@@ -115,6 +114,7 @@ public class PixelTeleporter implements PConstants {
 		// if we're the first PixelTeleporter object, enable keyboard/mouse UI,
 		// configure default drawing settings and print welcome message
 		if (refCount == 1) {
+			eventListener = new ptEventListener(this);			
 			isController = true;
 			enableUI();
 
@@ -172,8 +172,8 @@ public class PixelTeleporter implements PConstants {
 	public void enableUI() {
 		if (uiActive) return;
 		uiActive = true;
-		app.registerMethod("mouseEvent", ptEventListener);
-		app.registerMethod("keyEvent", ptEventListener);
+		app.registerMethod("mouseEvent", eventListener);
+		app.registerMethod("keyEvent", eventListener);
 	}
 
 	/**
@@ -183,8 +183,8 @@ public class PixelTeleporter implements PConstants {
 	public void disableUI() {
 		if (!uiActive) return;
 		uiActive = false;
-		app.unregisterMethod("mouseEvent", ptEventListener);
-		app.unregisterMethod("keyEvent", ptEventListener);	  
+		app.unregisterMethod("mouseEvent", eventListener);
+		app.unregisterMethod("keyEvent", eventListener);	  
 	}
 
 	/**
@@ -386,6 +386,14 @@ public class PixelTeleporter implements PConstants {
 		thread.quit();
 		refCount--;
 	}  
+	
+	/**
+	 * Register an LED object for display. Must be called before drawing.
+	 * @param obj
+	 */
+	public void registerObject(LinkedList <ScreenLED> obj) {
+		renderer.registerObject(obj);
+	}
 
 	/**
 	 * 	Creates ScreenLED object with x,y,z coords initialized to 0.
@@ -450,44 +458,7 @@ public class PixelTeleporter implements PConstants {
 	 * null if unable to read the specified file.
 	 */
 	public LinkedList<ScreenLED> importPixelblazeMap(String fileName,float scale) {
-		LinkedList<ScreenLED> obj = new LinkedList<ScreenLED>();
-		JSONArray json = app.loadJSONArray(fileName);
-
-		// read the map
-		for (int i = 0; i < json.size(); i++) {
-			float x,y,z;
-
-			JSONArray mapEntry = json.getJSONArray(i);
-			float [] coords = mapEntry.getFloatArray();  
-
-			x = coords[0];
-			y = coords[1];
-			z = (coords.length == 3) ? z = coords[2] : 0;
-
-			ScreenLED led = new ScreenLED(this,scale * x,scale * y,scale * z);
-			led.setIndex(i);
-			obj.add(led);
-		}
-		
-		// adjust to center the object at (0,0,0) in world space
-		PVector center = findObjectCenter(obj);
-		for (ScreenLED p : obj) {
-			p.x -= center.x;
-			p.y -= center.y;
-			p.z -= center.z;			
-		}
-		return obj;
-	}
-
-	/**
-	 * comparator for sorting.  Used by exportPixeblazeMap()
-	 */	
-	class compareLEDIndex implements Comparator<ScreenLED> {
-
-		@Override
-		public int compare(ScreenLED p1, ScreenLED p2) {
-			return (p1.index < p2.index) ? -1 : 1;
-		}
+		return ptf.importPixelblazeMap(fileName,scale);
 	}
 
 	/**
@@ -500,48 +471,8 @@ public class PixelTeleporter implements PConstants {
 	 * @return true if successful, false otherwise
 	 */
 	public boolean exportPixelblazeMap(LinkedList<ScreenLED> obj,String fileName,float scale, boolean is3D) {
-		JSONArray json,mapEntry;
-
-		//sort object by pixel index for export. 
-		@SuppressWarnings("unchecked")
-		LinkedList<ScreenLED> sortedCopy = (LinkedList<ScreenLED>) obj.clone();
-		Collections.sort(sortedCopy,new compareLEDIndex());
-
-		json = new JSONArray();
-		for (ScreenLED led : sortedCopy) {
-			mapEntry = new JSONArray();
-			mapEntry.append(scale * led.x);
-			mapEntry.append(scale * led.y);
-			if (is3D) mapEntry.append(scale * led.z);    
-
-			json.append(mapEntry);
-		}  
-		return app.saveJSONArray(json,fileName);  
+		return ptf.exportPixelblazeMap(obj,fileName,scale,is3D);
 	}
-
-	/**
-	 * Find geometric center of object represented by ScreenLED list.
-	 *
-	 * @param obj Linked list of ScreenLEDs representing a displayable object
-	 * @return PVector with x,y,z set to object center
-	 */
-	public PVector findObjectCenter( LinkedList<ScreenLED> obj) {
-		PVector c = new PVector(0,0,0);
-		PVector mins = new PVector(1E7f,1E7f,1E7f);
-		PVector maxes = new PVector(-1E7f,-1E7f,-1E7f);
-
-		for (ScreenLED led : obj) {
-			if (led.x < mins.x) mins.x = led.x; if (led.x > maxes.x) maxes.x = led.x;
-			if (led.y < mins.y) mins.y = led.y; if (led.y > maxes.y) maxes.y = led.y;
-			if (led.z < mins.z) mins.z = led.z; if (led.z > maxes.z) maxes.z = led.z;    
-		}
-
-		c.x = mins.x + (maxes.x - mins.x) / 2;
-		c.y = mins.y + (maxes.y - mins.y) / 2;
-		c.z = mins.z + (maxes.z - mins.z) / 2;
-
-		return c;
-	}   
 
 	/**
 	 * Sets size of billboard on which LED model is rendered.
@@ -556,91 +487,53 @@ public class PixelTeleporter implements PConstants {
 	public void setAmbientLight(float value) {
 		renderer.setAmbientLight(value);
 	}	
-	
+
 	/**
 	 * (0 - 10) how far light from LEDs travels in the scene
 	 */	
 	public void setFalloff(float value) {
 		renderer.setFalloff(value);
 	}	
-	
-	/**
-	 * RGB color of surface behind emitter
-	 */	
-	public void setBackgroundColor(int value) {
-		renderer.setBackgroundColor(value);
-	}	
-	
-	/**
-	 * (0 - 255) opacity of surface behind emitter
-	 */	
-	public void setBackgroundAlpha(int value) {
-      renderer.setBackgroundAlpha(value);
-	}	
-	
+
 	/**
 	 * (0.0 - 1.0) light intensity from sides of emitter
 	 */	
 	public void setIndirectIntensity(float value) {
-	  renderer.setIndirectIntensity(value);
+		renderer.setIndirectIntensity(value);
 	}	
-	
-	/**
-	 * (0.0 - 1000) simulates CCD camera bloom
-	 */	
-    public void setExposure(float value) {
-       renderer.setOverexposure(value);
-    }
-    
-    /**
-     * (0.0 - 2) adjust displayed gamma to better match LED colors
-     */    
-    public void setGammaCorrection(float value) {
-    	renderer.setGammaCorrection(value);
-    }
-    
-    /**
-     * Choose type of LED to render.  Available types are:
-     * 	<li><strong>LEDType.BULB</strong> - capsule shaped LED</li>
-	 *  <li><strong>LEDType.SMD</strong> - square SMD LED</li>
-	 *  <li><strong>LEDType.STONE</strong> - small chunk of transparent sea glass</li>
-	 *  <li><strong>LEDType.STAR</strong> - a... star. Bright.  With rays.</li>
-     *  To specify a custom shader, use the SetModel(String fragment, String vertex) variant
-     *  of this method.
-     */
-    public void setModel(LEDType value) {
-    	renderer.setModel(value);
-    }
-
-    /**
-     * Choose type of LED to render.  Available types are:
-     * 	<li><strong>LEDType.BULB</strong> - capsule shaped LED</li>
-	 *  <li><strong>LEDType.SMD</strong> - square SMD LED</li>
-	 *  <li><strong>LEDType.STONE</strong> - small chunk of transparent sea glass</li>
-	 *  <li><strong>LEDType.STAR</strong> - a... star. Bright.  With rays.</li>
-     *  To specify a custom shader, use the SetModel(String fragment, String vertex) variant
-     *  of this method.
-     */   
-    public void setModel(String fragment,String vertex) {
-      renderer.setModel(fragment,vertex);
-    }    
-    
 
 	/**
-	 * Sets the method used to draw LED objects to the screen. Available methods are:
-	 * <p>
-	 * 
-	 * <li><strong>RenderMethod.DEFAULT</strong>  - renders ScreenObj lists in 2D and ScreenShape lists in 3D.  Fast and simple.</li>
-	 * <li><strong>RenderMethod.DRAW3D</strong>   - renders all objects in 3D space using Processing graphics API calls</li>
-	 */
-	public void setRenderMethod(RenderMethod m) {
-		LEDRenderer r = new HDRenderFirstPass(this,m);
-		if (renderer != null) {
-			r.copyControlsFrom(renderer);
-	
-		}
-		renderer = r;		
+	 * (0.0 - 2) adjust displayed gamma to better match LED colors
+	 */    
+	public void setGammaCorrection(float value) {
+		renderer.setGammaCorrection(value);
 	}
+
+	/**
+	 * Choose type of LED to render.  Available types are:
+	 * 	<li><strong>LEDType.BULB</strong> - capsule shaped LED</li>
+	 *  <li><strong>LEDType.SMD</strong> - square SMD LED</li>
+	 *  <li><strong>LEDType.STONE</strong> - small chunk of transparent sea glass</li>
+	 *  <li><strong>LEDType.STAR</strong> - a... star. Bright.  With rays.</li>
+	 *  To specify a custom shader, use the SetModel(String fragment, String vertex) variant
+	 *  of this method.
+	 */
+	public void setModel(LEDType value) {
+		renderer.setModel(value);
+	}
+
+	/**
+	 * Choose type of LED to render.  Available types are:
+	 * 	<li><strong>LEDType.BULB</strong> - capsule shaped LED</li>
+	 *  <li><strong>LEDType.SMD</strong> - square SMD LED</li>
+	 *  <li><strong>LEDType.STONE</strong> - small chunk of transparent sea glass</li>
+	 *  <li><strong>LEDType.STAR</strong> - a... star. Bright.  With rays.</li>
+	 *  To specify a custom shader, use the SetModel(String fragment, String vertex) variant
+	 *  of this method.
+	 */   
+	public void setModel(String fragment,String vertex) {
+		renderer.setModel(fragment,vertex);
+	}    
 
 	/**
 	 * Draw an LED object using the selected renderer and the current viewing
@@ -664,147 +557,6 @@ public class PixelTeleporter implements PConstants {
 
 	public void post() {
 		if (isRunning) requestData();	
-	}
-
-	/**
-	 * The listener interface for receiving ptEvent events.
-	 * The class that is interested in processing a ptEvent
-	 * event implements this interface, and the object created
-	 * with that class is registered with a component using the
-	 * component's <code>addptEventListener<code> method. When
-	 * the ptEvent event occurs, that object's appropriate
-	 * method is invoked.
-	 *
-	 * @see ptEventEvent
-	 */
-	protected class ptEventListener {
-
-		/**
-		 * Keyboard handler
-		 *
-		 * @param e keyboard event
-		 */
-		public void keyEvent(final KeyEvent e) {
-			if (e.getAction() == KeyEvent.RELEASE) {
-				switch (e.getKey()) {        
-				case ' ': // stop automatic rotation
-					mover.autoMove = !mover.autoMove;
-					break;
-				case 'r': //reset rotation & translation for foreground and back
-					mover.setRotation(0,0,0);
-					mover.mouseRotation.set(0,0,0);
-					mover.mouseTranslation.set(0,0,0);
-					mover.initializeCamera();
-					break;
-				case 'R':
-					bg.resetBackground();
-					break;
-				case TAB:
-					// pause/unpause data, hold current frame if paused
-					isRunning = !isRunning;
-					
-					// enable per-pixel tooltips only when paused.
-					if (isRunning) {
-						disablePixelInfo();						
-					}
-					else {
-						enablePixelInfo();
-					}
-					break;
-				case 'X':  // toggle display of axes
-				case 'x':	
-					showAxes = !showAxes;
-					break;
-
-				default:
-					break;
-				} 			
-			}
-		}
-
-		/**
-		 * Mouse event handler.
-		 *
-		 * @param e mouse event
-		 */
-		public void mouseEvent(final MouseEvent e) {
-			float x = e.getX();
-			float y = e.getY();
-			float distX,distY,offsetX,offsetY;
-
-			switch (e.getAction()) {
-			case MouseEvent.WHEEL:
-				if (e.isShiftDown())  {
-					// if shift, zoom in/out on the background
-					float s = bg.getScale();
-					s = s - (0.05f * (float) (e.getCount()));
-					PApplet.constrain(s,0.01f,1.5f);
-					bg.setScale(s);
-					bg.needScale = true;
-					bg.needClip = true;
-				}
-				else  {
-					mover.zoomCamera(30 * e.getCount());
-				}
-
-				break;
-			case MouseEvent.PRESS:
-				mover.dragOriginX = x;
-				mover.dragOriginY = y;
-				break;
-
-			case MouseEvent.RELEASE:
-				break;
-
-			case MouseEvent.DRAG:
-				distX = x - mover.dragOriginX;
-				distY = y - mover.dragOriginY;
-				mover.dragOriginX = x; 
-				mover.dragOriginY = y;	
-
-				if (e.isShiftDown())  {
-					// if shift drag w/either key, move the background
-					bg.moveRect(distX,distY);	
-				}
-				else if (e.getButton() == LEFT) {
-					// small dead zone so you won't always accidentally rotate when
-					// you click the screen.
-					if ((PApplet.abs(distX) < MOUSE_MIN_MOVEMENT) && 
-							(PApplet.abs(distY) < MOUSE_MIN_MOVEMENT)) {
-						return;						
-					}					
-
-					// rotation based on distance from start of drag 
-					distX = distX / app.width * TWO_PI;
-					distY = distY / app.height * TWO_PI;
-
-					// holding down alt rotates around the z axis only
-					if (e.isAltDown()) {
-						mover.mouseRotation.z += 
-								(PApplet.abs(distX) > PApplet.abs(distY)) ?  distX : distY; 						 						
-					}
-					// otherwise rotate around x and y
-					else {
-						mover.mouseRotation.x += distX;
-						mover.mouseRotation.y += distY;
-					}
-				}
-				else if (e.getButton() == RIGHT) {
-					// scale translation so we move a little faster as the camera moves away.
-					float m = (mover.eye.z <= mover.DEFAULT_CAMERA_DISTANCE) ? 1 : mover.eye.z / mover.DEFAULT_CAMERA_DISTANCE;
-					mover.mouseTranslation.x += m * distX; 
-					mover.mouseTranslation.y += m * distY; 									
-				}
-				break;				
-			case MouseEvent.CLICK:
-				break;
-			case MouseEvent.MOVE:
-				if (pixelInfoEnabled()) {
-					; // TODO - display per-pixel tooltip
-				}
-				break;
-			}				
-		}
 	}
 }
 
