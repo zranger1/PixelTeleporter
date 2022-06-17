@@ -32,7 +32,6 @@ package pixelTeleporter.library;
 
 import java.util.*;
 import processing.core.*;
-import pixelTeleporter.library.camera.*;
 
 /**
     Manages communication with the PixelTeleporter server device
@@ -46,18 +45,16 @@ import pixelTeleporter.library.camera.*;
 
 /*
  TODO LIST
- JSON save/restore renderer!! (include frame rate/frame count in saved data so we can recover timing on playback.  Or
+ JSON save/restore renderer to help make animated GIFs (include frame rate/frame count in saved data so we can recover timing on playback.  Or
  maybe timestamp of each frame so we can make the deltas the same.)
-
- RenderType.USER renderer support??
-
+ Finish RenderType.USER renderer support
  Recieve from multiple transport types - PT Classic, PT Broadcast, Artnet, etc..
  */
-
 public class PixelTeleporter implements PConstants {
 	PApplet app;	
 	PixelTeleporterThread thread;
 	PTCamera ptCam;
+	PTPower ptPower;
 	PTBackground bg;
 	PTFileUtils ptf;
 	int ledSize = 15;        
@@ -69,10 +66,10 @@ public class PixelTeleporter implements PConstants {
 	boolean isRunning = true;
 	boolean showPixelInfo = false;
 	boolean showAxes = true;
+	boolean powerAnalysis = true;
 	TooltipHandler toolTip;
 
 	Renderer renderer = null;
-	PTEventListener eventListener;
 
 	// global pt object reference counter 
 	static int refCount = 0; 
@@ -94,7 +91,8 @@ public class PixelTeleporter implements PConstants {
 	public PixelTeleporter(PApplet pApp,String ipAddr,int serverPort,int clientPort) {
 		this.app = pApp;	
 
-		ptCam = new PTCamera(app,DEFAULT_CAMERA_DISTANCE); 
+		ptCam = new PTCamera(this,DEFAULT_CAMERA_DISTANCE);
+		ptPower = new PTPower(this);
 		thread = new PixelTeleporterThread(this,ipAddr,clientPort,serverPort,PIXEL_BUFFER_SIZE);
 		pixelBuffer = thread.getPixelBuffer();
 		bg = new PTBackground(app);
@@ -114,7 +112,6 @@ public class PixelTeleporter implements PConstants {
 		// if we're the first PixelTeleporter object, enable keyboard/mouse UI,
 		// configure default drawing settings and print welcome message
 		if (refCount == 1) {
-			eventListener = new PTEventListener(this);			
 			isController = true;
 			//enableUI();
 
@@ -172,8 +169,7 @@ public class PixelTeleporter implements PConstants {
 	public void enableUI() {
 		if (uiActive) return;
 		uiActive = true;
-		app.registerMethod("mouseEvent", eventListener);
-		app.registerMethod("keyEvent", eventListener);
+		ptCam.setActive(uiActive);
 	}
 
 	/**
@@ -183,8 +179,7 @@ public class PixelTeleporter implements PConstants {
 	public void disableUI() {
 		if (!uiActive) return;
 		uiActive = false;
-		app.unregisterMethod("mouseEvent", eventListener);
-		app.unregisterMethod("keyEvent", eventListener);	  
+		ptCam.setActive(uiActive);  
 	}
 
 	/**
@@ -254,6 +249,21 @@ public class PixelTeleporter implements PConstants {
 	public boolean pixelInfoEnabled() {
 		return showPixelInfo;
 	}
+	
+	// Power Analysis methods
+	// TODO - add javadocs to these!
+	public void enablePowerAnalysis() { powerAnalysis = true; }
+	public void disablePowerAnalysis() { powerAnalysis = false; }
+		
+	public void setIdleConsumption(float n) { ptPower.setIdleConsumption(n); }
+	public void setElementMaxPower(float n) { ptPower.setElementMaxPower(n); }
+	public void setPowerEvaluator(PowerEvaluator p) { ptPower.setPowerEvaluator(p); }
+		
+	public float getCurrentPower() { return ptPower.getCurrent(); } 
+	public float getMaxPower() { return ptPower.getMaximum(); }
+	public float getAveragePower() { return ptPower.getAverage(); }	
+	
+	public void resetPowerStats() { ptPower.reset(); }	
 
 	/**
 	 *  Start data transport and initialize camera UI if enabled
@@ -482,6 +492,8 @@ public class PixelTeleporter implements PConstants {
 		app.popMatrix();		
 		app.resetShader();
 		app.popStyle();
+		
+		if (powerAnalysis == true) ptPower.evaluate(obj);
 	}
 
 	public void pre() {

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package pixelTeleporter.library.camera;
+package pixelTeleporter.library;
 
 import pixelTeleporter.library.camera.org.apache.commons.math.geometry.Rotation;
 import pixelTeleporter.library.camera.org.apache.commons.math.geometry.Vector3D;

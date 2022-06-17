@@ -12,30 +12,30 @@ import java.util.*;
 // constants
 final int numRows=16; 
 final int numCols=16; 
+final float pixelSize = 28;
 
 // global variables
 PixelTeleporter pt;
 LinkedList<ScreenLED> panel;    // list of LEDs in our matrix w/position and color info
-PShader bloom;
-
+int frameTime;
 
 // build 2D LED Matrix centered on the origin
 LinkedList<ScreenLED> buildMatrix(int dimX,int dimY) {
-  int pixelSize = pt.getElementSize();
   int row,col,pixel;
   float xOffs, yOffs;
+  float pixelSpacing = pixelSize * 0.5;
   ScreenLED led;
   LinkedList<ScreenLED> panel;
     
   panel = new LinkedList<ScreenLED>();
   
-  xOffs = -((dimX-1) * pixelSize) / 2;
-  yOffs = -((dimY-1) * pixelSize) / 2;
+  xOffs = -((dimX-1) * pixelSpacing) / 2;
+  yOffs = -((dimY-1) * pixelSpacing) / 2;
   pixel = 0;
   
   for (row = 0; row < dimY; row++) {
     for (col = 0; col < dimX; col++) {
-       led = pt.ScreenLEDFactory(xOffs+(col * pixelSize), yOffs+(row * pixelSize));
+       led = pt.ScreenLEDFactory(xOffs+(col * pixelSpacing), yOffs+(row * pixelSpacing));
        led.setIndex(pixel++);
        panel.add(led);
     }  
@@ -47,37 +47,27 @@ void setup() {
   size(800,800,P3D);     // Set up the stage 
   
   pt = new PixelTeleporter(this,"192.168.1.42");
-  pt.setElementSize(40,90);
-  
-  // All the available rendering controls!
-  pt.setRenderMethod(RenderMethod.HD2D);
-  //pt.setRenderControl(RenderControl.LEDMODEL_BULB,0);  
-  pt.setRenderControl(RenderControl.LEDMODEL_SMD,0);    
-  pt.setRenderControl(RenderControl.FALLOFF,2);
-  pt.setRenderControl(RenderControl.INDIRECT_INTENSITY,0.35); 
-  pt.setRenderControl(RenderControl.AMBIENT_LIGHT,16);
-  pt.setRenderControl(RenderControl.OVEREXPOSURE,0.75);
-  pt.setRenderControl(RenderControl.GAMMA,1.0);
-  //pt.setRenderControl(RenderControl.BGALPHA,0);  
-  
+  pt.setModel(LEDType.STAR);
+  pt.setWeight(80);
+  pt.setFalloff(2);
+  pt.setAmbientLight(10);   
 
-// Optional - load single pass blur shader
-  bloom = loadShader("bloom.glsl");
-  bloom.set("overdrive",1.0);
-  bloom.set("gamma",1.0);  
-  
   panel = buildMatrix(numCols,numRows);
+  pt.registerObject(panel);
    
   pt.start();
+  frameTime = millis();
 }
+
 
 void draw() {  
   background(30);
 
 // draw LED matrix
-  pt.draw(panel);
+  pt.draw(panel); 
   
-// Testing!  Apply overexposure shader. 
-
-  filter(bloom);          
+  if ((millis() - frameTime) > 2000) {
+    frameTime = millis();
+    println("Current, Average, Max: ",pt.getCurrentPower(),pt.getAveragePower(),pt.getMaxPower());
+  }
 }

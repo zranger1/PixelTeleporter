@@ -1,4 +1,7 @@
 # PixelTeleporter
+
+**LED Previsualization Toolkit**
+
 - **Display:** View the output from your hardware LED controller as virtual 3D pixels on a computer monitor.  
 - **Prototype:** Build a virtual version of your next LED project so you can have software written and debugged before you build
 the physical display.
@@ -15,10 +18,10 @@ The server then forwards the pixel data across your LAN to the computer running 
 The Processing library make it simple to write sketches to receive the data and draw the pixels in 3D on your computer.
 With this toolset and the included  examples, you can quickly prototype almost any physical arrangement of LEDs.
 
-## Version 1.1.9995b (10/18/2021) What's New
---- It's **ALMOST** the 1.2.0 release --
-
-This release is just to give an advance look at the new LED renderer. It simulates light spreading and camera saturation, and even at this stage looks much more like actual LEDs than before.  See the example 'LEDRenderTest'  for an early demonstration.  This will be fully implemted and documented in v1.2.0.  
+## Version 2.0 (6/2022) What's New
+Many Changes!
+Everything is 3D
+LED rendering is done with custom shaders in GPU.
 
 Easy install for Processing 4:  If you're using the Processing 4 beta, you can install by downloading the file PixelTeleporter.pdex from the 1.1.9995b release area, and double clicking it or dropping it on top of Processing.  When Processing asks if you'd like to install PixelTeleporter, say "YES!".   That's it.
 

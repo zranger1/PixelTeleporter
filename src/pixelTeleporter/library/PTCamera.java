@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package pixelTeleporter.library.camera;
+package pixelTeleporter.library;
 
 import pixelTeleporter.library.camera.org.apache.commons.math.geometry.*;
 import processing.core.PApplet;
@@ -32,7 +32,7 @@ import processing.opengl.PGraphicsOpenGL;
  * @author Thomas Diewald
  * https://github.com/jdf/peasycam
  */
-public class PTCamera {
+class PTCamera {
 	private static final Vector3D LOOK = Vector3D.plusK;
 	private static final Vector3D UP = Vector3D.plusJ;
 	private static final double SMALLEST_MINIMUM_DISTANCE = 0.01;
@@ -41,13 +41,14 @@ public class PTCamera {
 		YAW, PITCH, ROLL, SUPPRESS_ROLL
 	}
 
+	private final PixelTeleporter pt;
 	private final PGraphics g;
 	private final PApplet p;
 
 	private final double startDistance;
 	private final Vector3D startCenter;
 
-	private boolean resetOnDoubleClick = true;
+//	private boolean resetOnDoubleClick = true;
 	private double minimumDistance = 1;
 	private double maximumDistance = Double.MAX_VALUE;
 
@@ -67,58 +68,60 @@ public class PTCamera {
 	private final InterpolationManager rotationInterps = new InterpolationManager();
 	private final InterpolationManager centerInterps = new InterpolationManager();
 	private final InterpolationManager distanceInterps = new InterpolationManager();
-
-	private final DragHandler panHandler /* ha ha ha */ = new DragHandler() {
+	
+	private final DragHandler panHandler = new DragHandler() {
 		public void handleDrag(final double dx, final double dy) {
 			dampedPanX.impulse(dx / 8.);
 			dampedPanY.impulse(dy / 8.);
 		}
 	};
-	private DragHandler centerDragHandler = panHandler;
-
+	
 	private final DragHandler rotateHandler = new DragHandler() {
 		public void handleDrag(final double dx, final double dy) {
 			mouseRotate(dx, dy);
 		}
-	};
-	private DragHandler leftDragHandler = rotateHandler;
+	};	
 
 	private final DragHandler zoomHandler = new DragHandler() {
 		public void handleDrag(final double dx, final double dy) {
 			dampedZoom.impulse(dy / 10.0);
 		}
 	};
-	private DragHandler rightDraghandler = zoomHandler;
-
+	
 	private final WheelHandler zoomWheelHandler = new WheelHandler() {
 		public void handleWheel(final int delta) {
 			dampedZoom.impulse(wheelScale * delta);
 		}
-	};
+	};	
+	
+	private DragHandler centerDragHandler = zoomHandler;
+	private DragHandler leftDragHandler = rotateHandler;
+	private DragHandler rightDraghandler = panHandler;
+
 	private WheelHandler wheelHandler = zoomWheelHandler;
 	private double wheelScale = 1.0;
 
-	private final PeasyEventListener peasyEventListener = new PeasyEventListener();
+	private final EventListener peasyEventListener = new EventListener();
 	private boolean isActive = false;
 
 
-
-	public PTCamera(final PApplet parent, final double distance) {
-		this(parent, parent.g, 0, 0, 0, distance);
+	public PTCamera(final PixelTeleporter pt, final double distance) {
+		this(pt, pt.app.g, 0, 0, 0, distance);
 	}
 
-	public PTCamera(final PApplet parent, final double lookAtX, final double lookAtY,
+	public PTCamera(final PixelTeleporter pt, final double lookAtX, final double lookAtY,
 			final double lookAtZ, final double distance) {
-		this(parent, parent.g, lookAtX, lookAtY, lookAtZ, distance);
+		this(pt, pt.app.g, lookAtX, lookAtY, lookAtZ, distance);
 	}
 
-	public PTCamera(final PApplet parent, final PGraphics pg, final double distance) {
-		this(parent, pg, 0, 0, 0, distance);
+	public PTCamera(final PixelTeleporter pt, final PGraphics pg, final double distance) {
+		this(pt, pg, 0, 0, 0, distance);
 	}
 
-	public PTCamera(final PApplet parent, PGraphics pg, final double lookAtX,
+	public PTCamera(final PixelTeleporter pt, PGraphics pg, final double lookAtX,
 			final double lookAtY, final double lookAtZ, final double distance) {
-		this.p = parent;
+		this.pt = pt;
+		this.p = pt.app;
 		this.g = pg;
 		this.startCenter = this.center = new Vector3D(lookAtX, lookAtY, lookAtZ);
 		this.startDistance = this.distance = Math.max(distance,
@@ -260,13 +263,65 @@ public class PTCamera {
 		return (x > x0) && (x < x1) && (y > y0) && (y < y1);
 	}
 
-	protected class PeasyEventListener {
+	protected class EventListener {
 
 		public boolean isActive = false;
 
 		public void keyEvent(final KeyEvent e) {
 			if (e.getAction() == KeyEvent.RELEASE && e.isShiftDown())
 				dragConstraint = null;
+			
+			if (e.getAction() == KeyEvent.RELEASE) {
+				char c = e.getKey();
+				c = Character.toLowerCase(c);
+				switch (c) {
+				case ' ':
+					// stop automatic rotation
+					//pt.ptCam.autoMove = !pt.ptCam.autoMove;
+					break;
+				case 'r':
+					//reset rotation & translation for foreground and back
+                    reset();
+					break;
+				case PConstants.TAB:
+					// pause/unpause data, hold current frame if paused
+					pt.isRunning = !pt.isRunning;
+
+					// enable per-pixel tooltips only when paused.
+					if (pt.isRunning) {
+						pt.disablePixelInfo();						
+					}
+					else {
+						pt.enablePixelInfo();
+					}
+					break;
+				case 'x':
+					// toggle display of axes
+					pt.showAxes = !pt.showAxes;
+					break;
+				case 'w':
+					// zoom in
+					break;
+				case 'a':
+					// rotateY left;
+					break;
+				case 's':
+					// rotateY right'
+					break;
+				case 'd':
+					// zoom out
+					break;	
+				case 'q':
+					// translate up
+					break;	
+				case 'e':
+					// translate down
+					break;						
+				default:
+					break;
+				} 			
+			}			
+			
 		}
 
 		public void mouseEvent(final MouseEvent e) {
@@ -284,8 +339,9 @@ public class PTCamera {
 				break;
 
 			case MouseEvent.CLICK:
+				// reset on doubleclick
 				if (insideViewport(p.mouseX, p.mouseY)) {
-					if (resetOnDoubleClick && 2 == (int)e.getCount()) {
+					if (2 == e.getCount()) {
 						reset();
 					}
 				}
@@ -293,7 +349,7 @@ public class PTCamera {
 
 			case MouseEvent.WHEEL:
 				if (wheelHandler != null && insideViewport(p.mouseX, p.mouseY)) {
-					wheelHandler.handleWheel((int)e.getCount());
+					wheelHandler.handleWheel(e.getCount());
 				}
 				break;
 
@@ -304,8 +360,9 @@ public class PTCamera {
 
 					if (e.isShiftDown()) {
 						if (dragConstraint == null && Math.abs(dx - dy) > 1) {
-							dragConstraint = Math.abs(dx) > Math.abs(dy) ? Constraint.YAW
-									: Constraint.PITCH;
+							dragConstraint = Constraint.ROLL;
+							//dragConstraint = Math.abs(dx) > Math.abs(dy) ? Constraint.YAW
+									//: Constraint.PITCH;
 						}
 					} else if (permaConstraint != null) {
 						dragConstraint = permaConstraint;
@@ -314,8 +371,7 @@ public class PTCamera {
 					}
 
 					final int b = p.mouseButton;
-					if (centerDragHandler != null && (b == PConstants.CENTER
-							|| (b == PConstants.LEFT && e.isMetaDown()))) {
+					if (centerDragHandler != null && (b == PConstants.CENTER)) {
 						centerDragHandler.handleDrag(dx, dy);
 					} else if (leftDragHandler != null && b == PConstants.LEFT) {
 						leftDragHandler.handleDrag(dx, dy);
@@ -438,7 +494,7 @@ public class PTCamera {
 	}
 
 	/**
-	 * Where is the PeasyCam in world space?
+	 * Where is the camera in world space?
 	 * 
 	 * @return float[]{x,y,z}
 	 */
@@ -527,10 +583,6 @@ public class PTCamera {
 	public void setMaximumDistance(final double maximumDistance) {
 		this.maximumDistance = maximumDistance;
 		safeSetDistance(distance);
-	}
-
-	public void setResetOnDoubleClick(final boolean resetOnDoubleClick) {
-		this.resetOnDoubleClick = resetOnDoubleClick;
 	}
 
 	public void setState(final CameraState state) {

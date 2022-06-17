@@ -1,9 +1,9 @@
 /**
  * 
  */
-package pixelTeleporter.library.camera;
+package pixelTeleporter.library;
 
-import pixelTeleporter.library.camera.PTCamera.AbstractInterp;
+import pixelTeleporter.library.PTCamera.AbstractInterp;
 
 class InterpolationManager {
 	private AbstractInterp currentInterpolator = null;

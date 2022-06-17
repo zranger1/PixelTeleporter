@@ -42,9 +42,9 @@ void setup() {
   
   pt = new PixelTeleporter(this,"192.168.1.42");  
   pt.setModel(LEDType.BULB);
-  pt.setWeight(100);
-  pt.setFalloff(2.5);
-  pt.setAmbientLight(16);   
+  pt.setWeight(80);
+  pt.setFalloff(2.8);
+  pt.setAmbientLight(10);   
   
 // create 10x10x10 (1000 pixel) volumetric cube
   object = buildVolumetricCube(10,10,10); 
@@ -56,7 +56,7 @@ void setup() {
 }
 
 void draw() {   
-  background(30);
+  background(0);
 
 // draw volumetric cube
   pt.draw(object);

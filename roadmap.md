@@ -59,4 +59,7 @@ could act as a proxy for how far the light from a single LED can travel.  (but s
 - rotational behavior of SMD model is strange, and possibly should be fixed.
 
 # Things to Do
-shader selection API -- maybe setRenderThingie(MODEL,CUSTOM), then setCustomShader("fragment","vertex");
+- shader selection API -- maybe setRenderThingie(MODEL,CUSTOM), then setCustomShader("fragment","vertex");
+- Explain coordinate systems:  OpenGL & Processing use a left handed,Y up system.  Pixelblaze uses a Z up system.  This means you need
+to rotate your 3D objects 90 degrees around the X axis in PixelTeleporter to get them properly oriented in the world system.  We can do
+this automatically in registerObject(), I think.
