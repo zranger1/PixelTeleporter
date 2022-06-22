@@ -258,6 +258,7 @@ public class PixelTeleporter implements PConstants {
 	public void setIdleConsumption(float n) { ptPower.setIdleConsumption(n); }
 	public void setElementMaxPower(float n) { ptPower.setElementMaxPower(n); }
 	public void setPowerEvaluator(PowerEvaluator p) { ptPower.setPowerEvaluator(p); }
+	public void setPowerModel(PowerModel p) { ptPower.setPowerModel(p); }	
 		
 	public float getCurrentPower() { return ptPower.getCurrent(); } 
 	public float getMaxPower() { return ptPower.getMaximum(); }
@@ -495,6 +496,14 @@ public class PixelTeleporter implements PConstants {
 		
 		if (powerAnalysis == true) ptPower.evaluate(obj);
 	}
+	
+	public void beginHUD() {
+		ptCam.beginHUD();
+	}
+	
+	public void endHUD() {
+		ptCam.endHUD();
+	}	
 
 	public void pre() {
 		bg.showImage(); 
